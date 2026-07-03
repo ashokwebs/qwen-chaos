@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Qwen Pricing — Plans for Every Developer</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+    :root {
+      --bg: #0a0a0f; --bg-alt: #12121a; --bg-card: #16161f;
+      --text: #ffffff; --text-secondary: #a1a1aa; --text-muted: #71717a;
+      --primary: #6366f1; --primary-hover: #818cf8; --accent: #06b6d4;
+      --accent-2: #8b5cf6; --success: #10b981; --warning: #f59e0b;
+      --border: rgba(255,255,255,0.1);
+      --gradient: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #06b6d4 100%);
+    }
+    html { scroll-behavior: smooth; }
+    body { font-family: 'Inter', -apple-system, sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; }
+    a { color: var(--primary-hover); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    .top-nav {
+      position: sticky; top: 0; z-index: 100;
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 1rem 2rem; background: rgba(10,10,15,0.85); backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border);
+    }
+    .top-nav .logo {
+      font-family: 'JetBrains Mono', monospace; font-size: 1.2rem; font-weight: 700;
+      background: var(--gradient); -webkit-background-clip: text; background-clip: text;
+      -webkit-text-fill-color: transparent; text-decoration: none;
+    }
+    .top-nav .logo:hover { text-decoration: none; }
+    .top-nav-links { display: flex; gap: 1.5rem; }
+    .top-nav-links a { font-size: 0.85rem; color: var(--text-secondary); }
+    .top-nav-links a:hover { color: var(--text); text-decoration: none; }
+
+    .hero { text-align: center; padding: 6rem 2rem 4rem; }
+    .hero h1 { font-size: clamp(2.5rem, 6vw, 4rem); font-weight: 800; margin-bottom: 1rem; }
+    .hero h1 .gradient { background: var(--gradient); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+    .hero p { font-size: 1.15rem; color: var(--text-secondary); max-width: 600px; margin: 0 auto; }
+
+    .container { max-width: 1200px; margin: 0 auto; padding: 0 2rem; }
+
+    /* Pricing Cards */
+    .pricing-grid {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 2rem;
+      padding: 3rem 0 5rem;
+    }
+
+    .pricing-card {
+      background: var(--bg-card); border: 1px solid var(--border); border-radius: 20px;
+      padding: 2.5rem; position: relative; overflow: hidden;
+      transition: all 0.3s;
+    }
+    .pricing-card:hover { border-color: var(--primary); transform: translateY(-4px); }
+
+    .pricing-card.popular {
+      border-color: var(--primary);
+      box-shadow: 0 0 40px rgba(99,102,241,0.15);
+    }
+    .pricing-card.popular::before {
+      content: 'Most Popular';
+      position: absolute; top: 1.5rem; right: -2rem;
+      background: var(--gradient); color: white;
+      padding: 0.3rem 3rem; font-size: 0.7rem; font-weight: 600;
+      text-transform: uppercase; letter-spacing: 1px;
+      transform: rotate(45deg);
+    }
+
+    .plan-name {
+      font-size: 0.85rem; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 2px; color: var(--text-muted); margin-bottom: 1rem;
+    }
+
+    .plan-price {
+      font-size: 3rem; font-weight: 800; margin-bottom: 0.5rem;
+    }
+    .plan-price .currency { font-size: 1.5rem; vertical-align: top; }
+    .plan-price .period { font-size: 0.9rem; color: var(--text-muted); font-weight: 400; }
+
+    .plan-desc {
+      color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 2rem;
+    }
+
+    .plan-divider {
+      height: 1px; background: var(--border); margin: 1.5rem 0;
+    }
+
+    .plan-features {
+      list-style: none; margin-bottom: 2rem;
+    }
+    .plan-features li {
+      padding: 0.5rem 0; color: var(--text-secondary); font-size: 0.9rem;
+      display: flex; align-items: center; gap: 0.75rem;
+    }
+    .plan-features li .check { color: var(--success); font-weight: 700; }
+    .plan-features li .cross { color: var(--text-muted); }
+
+    .plan-btn {
+      display: block; padding: 0.75rem 1.5rem; border-radius: 8px;
+      font-weight: 600; font-size: 0.9rem; text-align: center;
+      transition: all 0.3s; cursor: pointer; text-decoration: none;
+    }
+    .plan-btn-primary {
+      background: var(--gradient); color: white;
+      box-shadow: 0 4px 20px rgba(99,102,241,0.3);
+    }
+    .plan-btn-primary:hover {
+      transform: translateY(-2px); box-shadow: 0 6px 30px rgba(99,102,241,0.5);
+      text-decoration: none;
+    }
+    .plan-btn-secondary {
+      background: rgba(255,255,255,0.05); color: var(--text);
+      border: 1px solid var(--border);
+    }
+    .plan-btn-secondary:hover {
+      border-color: var(--primary); text-decoration: none;
+    }
+
+    /* Feature Comparison */
+    .comparison-section { padding: 4rem 0; background: var(--bg-alt); }
+    .comparison-title { font-size: 1.8rem; font-weight: 800; margin-bottom: 3rem; text-align: center; }
+
+    .comparison-table {
+      width: 100%; border-collapse: collapse;
+      background: var(--bg-card); border-radius: 16px; overflow: hidden;
+      border: 1px solid var(--border);
+    }
+    .comparison-table th, .comparison-table td {
+      padding: 1rem 1.5rem; text-align: left; border-bottom: 1px solid var(--border);
+    }
+    .comparison-table th {
+      background: rgba(99,102,241,0.08); font-size: 0.75rem; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted);
+    }
+    .comparison-table td { font-size: 0.85rem; color: var(--text-secondary); }
+    .comparison-table tr:last-child td { border-bottom: none; }
+    .comparison-table tr:hover td { background: rgba(99,102,241,0.03); }
+    .check { color: var(--success); }
+    .cross { color: var(--text-muted); }
+    .partial { color: var(--warning); }
+
+    /* FAQ Teaser */
+    .pricing-faq {
+      padding: 4rem 0; text-align: center;
+    }
+    .pricing-faq h2 { font-size: 1.5rem; font-weight: 700; margin-bottom: 1rem; }
+    .pricing-faq p { color: var(--text-secondary); margin-bottom: 1.5rem; }
+    .pricing-faq .btn {
+      display: inline-block; padding: 0.75rem 2rem; background: var(--gradient);
+      color: white; border-radius: 50px; font-weight: 600; transition: all 0.3s;
+    }
+    .pricing-faq .btn:hover { transform: translateY(-2px); text-decoration: none; }
+
+    footer { border-top: 1px solid var(--border); padding: 3rem 2rem; text-align: center; }
+    .footer-text { font-size: 0.8rem; color: var(--text-muted); }
+
+    .reveal { opacity: 0; transform: translateY(30px); transition: opacity 0.8s, transform 0.8s; }
+    .reveal.visible { opacity: 1; transform: translateY(0); }
+
+    @media (max-width: 768px) { .top-nav-links { display: none; } }
+  </style>
+</head>
+<body>
+  <nav class="top-nav">
+    <a href="index.html" class="logo">← Qwen</a>
+    <div class="top-nav-links">
+      <a href="index.html">Home</a>
+      <a href="docs.html">Docs</a>
+      <a href="tech.html">Tech</a>
+      <a href="showcase.html">Showcase</a>
+      <a href="faq.html">FAQ</a>
+      <a href="about.html">About</a>
+    </div>
+  </nav>
+
+  <section class="hero">
+    <h1>Plans for Every <span class="gradient">Developer</span></h1>
+    <p>Start free. Scale as you grow. Enterprise when you need it. No hidden fees, no surprises.</p>
+  </section>
+
+  <section>
+    <div class="container">
+      <div class="pricing-grid">
+
+        <div class="pricing-card reveal">
+          <div class="plan-name">Free</div>
+          <div class="plan-price">
+            <span class="currency">$</span>0<span class="period">/month</span>
+          </div>
+          <p class="plan-desc">Perfect for exploring Qwen and personal projects.</p>
+          <div class="plan-divider"></div>
+          <ul class="plan-features">
+            <li><span class="check">✓</span> 50 conversations per day</li>
+            <li><span class="check">✓</span> Single project context</li>
+            <li><span class="check">✓</span> Code generation & editing</li>
+            <li><span class="check">✓</span> File operations (read, write, edit)</li>
+            <li><span class="check">✓</span> Test verification</li>
+            <li><span class="check">✓</span> Shell command execution</li>
+            <li><span class="check">✓</span> 32K context window</li>
+            <li><span class="cross">✗</span> Subagent delegation</li>
+            <li><span class="cross">✗</span> Memory system</li>
+            <li><span class="cross">✗</span> MCP integration</li>
+            <li><span class="cross">✗</span> Priority support</li>
+          </ul>
+          <a href="#" class="plan-btn plan-btn-secondary">Get Started Free</a>
+        </div>
+
+        <div class="pricing-card popular reveal">
+          <div class="plan-name">Pro</div>
+          <div class="plan-price">
+            <span class="currency">$</span>20<span class="period">/month</span>
+          </div>
+          <p class="plan-desc">For professional developers who need full power.</p>
+          <div class="plan-divider"></div>
+          <ul class="plan-features">
+            <li><span class="check">✓</span> Unlimited conversations</li>
+            <li><span class="check">✓</span> Multi-project context</li>
+            <li><span class="check">✓</span> Full code generation & editing</li>
+            <li><span class="check">✓</span> All file operations</li>
+            <li><span class="check">✓</span> Test verification</li>
+            <li><span class="check">✓</span> Shell command execution</li>
+            <li><span class="check">✓</span> 128K context window</li>
+            <li><span class="check">✓</span> Subagent delegation (3 concurrent)</li>
+            <li><span class="check">✓</span> Full memory system</li>
+            <li><span class="check">✓</span> MCP server integration</li>
+            <li><span class="check">✓</span> Priority support</li>
+          </ul>
+          <a href="#" class="plan-btn plan-btn-primary">Start Pro Trial →</a>
+        </div>
+
+        <div class="pricing-card reveal">
+          <div class="plan-name">Enterprise</div>
+          <div class="plan-price">
+            Custom<span class="period">pricing</span>
+          </div>
+          <p class="plan-desc">For teams and organizations that need scale and control.</p>
+          <div class="plan-divider"></div>
+          <ul class="plan-features">
+            <li><span class="check">✓</span> Everything in Pro</li>
+            <li><span class="check">✓</span> Unlimited team members</li>
+            <li><span class="check">✓</span> On-premise deployment option</li>
+            <li><span class="check">✓</span> Custom model fine-tuning</li>
+            <li><span class="check">✓</span> Unlimited subagents</li>
+            <li><span class="check">✓</span> Computer use capabilities</li>
+            <li><span class="check">✓</span> Team collaboration features</li>
+            <li><span class="check">✓</span> Advanced audit logging</li>
+            <li><span class="check">✓</span> SSO & role-based access</li>
+            <li><span class="check">✓</span> SLA guarantee</li>
+            <li><span class="check">✓</span> Dedicated support engineer</li>
+          </ul>
+          <a href="#" class="plan-btn plan-btn-secondary">Contact Sales</a>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <section class="comparison-section">
+    <div class="container reveal">
+      <h2 class="comparison-title">Feature Comparison</h2>
+      <table class="comparison-table">
+        <tr>
+          <th>Feature</th>
+          <th>Free</th>
+          <th>Pro</th>
+          <th>Enterprise</th>
+        </tr>
+        <tr>
+          <td>Conversations per day</td>
+          <td>50</td>
+          <td>Unlimited</td>
+          <td>Unlimited</td>
+        </tr>
+        <tr>
+          <td>Context window</td>
+          <td>32K</td>
+          <td>128K</td>
+          <td>128K+</td>
+        </tr>
+        <tr>
+          <td>Projects</td>
+          <td>1</td>
+          <td>10</td>
+          <td>Unlimited</td>
+        </tr>
+        <tr>
+          <td>Subagent delegation</td>
+          <td class="cross">✗</td>
+          <td>3 concurrent</td>
+          <td>Unlimited</td>
+        </tr>
+        <tr>
+          <td>Memory system</td>
+          <td class="cross">✗</td>
+          <td class="check">✓ Full</td>
+          <td class="check">✓ Full + custom</td>
+        </tr>
+        <tr>
+          <td>MCP integration</td>
+          <td class="cross">✗</td>
+          <td class="check">✓</td>
+          <td class="check">✓ Custom servers</td>
+        </tr>
+        <tr>
+          <td>Computer use</td>
+          <td class="cross">✗</td>
+          <td class="partial">◐ Limited</td>
+          <td class="check">✓ Full</td>
+        </tr>
+        <tr>
+          <td>Cron scheduling</td>
+          <td class="cross">✗</td>
+          <td class="check">✓</td>
+          <td class="check">✓</td>
+        </tr>
+        <tr>
+          <td>Team collaboration</td>
+          <td class="cross">✗</td>
+          <td class="cross">✗</td>
+          <td class="check">✓</td>
+        </tr>
+        <tr>
+          <td>On-premise deployment</td>
+          <td class="cross">✗</td>
+          <td class="cross">✗</td>
+          <td class="check">✓</td>
+        </tr>
+        <tr>
+          <td>Custom fine-tuning</td>
+          <td class="cross">✗</td>
+          <td class="cross">✗</td>
+          <td class="check">✓</td>
+        </tr>
+        <tr>
+          <td>Support</td>
+          <td>Community</td>
+          <td>Priority email</td>
+          <td>Dedicated engineer</td>
+        </tr>
+        <tr>
+          <td>SLA</td>
+          <td>—</td>
+          <td>99.5%</td>
+          <td>99.9%</td>
+        </tr>
+      </table>
+    </div>
+  </section>
+
+  <section class="pricing-faq">
+    <div class="container">
+      <h2>Questions about pricing?</h2>
+      <p>Check our FAQ for detailed answers about plans, billing, and features.</p>
+      <a href="faq.html" class="btn">Visit FAQ →</a>
+    </div>
+  </section>
+
+  <footer>
+    <div class="footer-text">
+      © 2026 Qwen by Alibaba Group — <a href="index.html">Home</a> · <a href="docs.html">Docs</a> · <a href="tech.html">Tech</a> · <a href="showcase.html">Showcase</a> · <a href="faq.html">FAQ</a> · <a href="about.html">About</a>
+    </div>
+  </footer>
+
+  <script>
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) entry.target.classList.add('visible');
+      });
+    }, { threshold: 0.1 });
+    document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+  </script>
+</body>
+</html>

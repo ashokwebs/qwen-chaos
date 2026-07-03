@@ -1,0 +1,568 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Qwen Tech — Under the Hood</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+    :root {
+      --bg: #0a0a0f; --bg-alt: #12121a; --bg-card: #16161f;
+      --text: #ffffff; --text-secondary: #a1a1aa; --text-muted: #71717a;
+      --primary: #6366f1; --primary-hover: #818cf8; --accent: #06b6d4;
+      --accent-2: #8b5cf6; --success: #10b981; --warning: #f59e0b; --error: #ef4444;
+      --border: rgba(255,255,255,0.1);
+      --gradient: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #06b6d4 100%);
+    }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: 'Inter', -apple-system, sans-serif;
+      background: var(--bg); color: var(--text); line-height: 1.6;
+    }
+    code, pre { font-family: 'JetBrains Mono', monospace; }
+    code { background: rgba(99,102,241,0.1); padding: 0.15rem 0.4rem; border-radius: 4px; font-size: 0.85em; }
+    pre { background: var(--bg-alt); border: 1px solid var(--border); border-radius: 12px; padding: 1.5rem; overflow-x: auto; margin: 1rem 0 2rem; position: relative; }
+    pre code { background: none; padding: 0; }
+    a { color: var(--primary-hover); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    /* Nav */
+    .top-nav {
+      position: sticky; top: 0; z-index: 100;
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 1rem 2rem;
+      background: rgba(10,10,15,0.85); backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border);
+    }
+    .top-nav .logo {
+      font-family: 'JetBrains Mono', monospace; font-size: 1.2rem; font-weight: 700;
+      background: var(--gradient); -webkit-background-clip: text; background-clip: text;
+      -webkit-text-fill-color: transparent; text-decoration: none;
+    }
+    .top-nav .logo:hover { text-decoration: none; }
+    .top-nav-links { display: flex; gap: 1.5rem; }
+    .top-nav-links a { font-size: 0.85rem; color: var(--text-secondary); }
+    .top-nav-links a:hover { color: var(--text); text-decoration: none; }
+
+    /* Hero */
+    .tech-hero {
+      text-align: center; padding: 6rem 2rem 4rem;
+      background: linear-gradient(to bottom, rgba(99,102,241,0.05), transparent);
+    }
+    .tech-hero h1 { font-size: clamp(2.5rem, 6vw, 4rem); font-weight: 800; margin-bottom: 1rem; }
+    .tech-hero h1 .gradient { background: var(--gradient); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+    .tech-hero p { font-size: 1.15rem; color: var(--text-secondary); max-width: 600px; margin: 0 auto; }
+
+    /* Container */
+    .container { max-width: 1200px; margin: 0 auto; padding: 0 2rem; }
+
+    /* Section */
+    .tech-section { padding: 5rem 0; }
+    .tech-section:nth-child(even) { background: var(--bg-alt); }
+    .section-title { font-size: 1.8rem; font-weight: 800; margin-bottom: 0.75rem; }
+    .section-desc { color: var(--text-secondary); font-size: 1.05rem; margin-bottom: 2.5rem; max-width: 700px; }
+
+    /* Architecture Diagram */
+    .arch-diagram {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; margin-bottom: 3rem;
+    }
+    .arch-box {
+      background: var(--bg-card); border: 1px solid var(--border); border-radius: 16px;
+      padding: 2rem; text-align: center; transition: all 0.3s;
+      position: relative; overflow: hidden;
+    }
+    .arch-box::after {
+      content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+      background: var(--gradient); opacity: 0; transition: opacity 0.3s;
+    }
+    .arch-box:hover { transform: translateY(-4px); border-color: var(--primary); }
+    .arch-box:hover::after { opacity: 1; }
+    .arch-box .arch-icon { font-size: 2rem; margin-bottom: 1rem; }
+    .arch-box h3 { font-size: 1.1rem; font-weight: 700; margin-bottom: 0.5rem; }
+    .arch-box p { color: var(--text-muted); font-size: 0.85rem; line-height: 1.6; }
+
+    /* Arrow connector */
+    .arch-flow {
+      display: flex; align-items: center; justify-content: center;
+      padding: 1rem 0; color: var(--text-muted); font-size: 1.5rem;
+    }
+
+    /* Spec Table */
+    .spec-table {
+      width: 100%; border-collapse: collapse; margin: 1.5rem 0;
+      background: var(--bg-card); border-radius: 12px; overflow: hidden;
+      border: 1px solid var(--border);
+    }
+    .spec-table th, .spec-table td {
+      padding: 1rem 1.5rem; text-align: left; border-bottom: 1px solid var(--border);
+    }
+    .spec-table th {
+      background: rgba(99,102,241,0.08); font-size: 0.75rem; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted);
+    }
+    .spec-table td { font-size: 0.9rem; color: var(--text-secondary); }
+    .spec-table tr:last-child td { border-bottom: none; }
+    .spec-table tr:hover td { background: rgba(99,102,241,0.03); }
+
+    /* Badge */
+    .badge {
+      display: inline-block; padding: 0.2rem 0.6rem; border-radius: 50px;
+      font-size: 0.7rem; font-weight: 600; text-transform: uppercase; letter-spacing: 1px;
+    }
+    .badge-green { background: rgba(16,185,129,0.15); color: var(--success); }
+    .badge-blue { background: rgba(99,102,241,0.15); color: var(--primary-hover); }
+    .badge-orange { background: rgba(245,158,11,0.15); color: var(--warning); }
+    .badge-red { background: rgba(239,68,68,0.15); color: var(--error); }
+
+    /* Metric Cards */
+    .metrics-grid {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem;
+      margin-bottom: 3rem;
+    }
+    .metric-card {
+      background: var(--bg-card); border: 1px solid var(--border); border-radius: 16px;
+      padding: 2rem; text-align: center; transition: all 0.3s;
+    }
+    .metric-card:hover { border-color: var(--primary); transform: translateY(-2px); }
+    .metric-value {
+      font-size: 2.2rem; font-weight: 800; margin-bottom: 0.25rem;
+      background: var(--gradient); -webkit-background-clip: text; background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .metric-label { font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; }
+    .metric-detail { font-size: 0.75rem; color: var(--text-muted); margin-top: 0.5rem; }
+
+    /* Tool List */
+    .tool-grid {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1rem;
+    }
+    .tool-item {
+      background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px;
+      padding: 1.5rem; transition: all 0.3s; display: flex; gap: 1rem; align-items: start;
+    }
+    .tool-item:hover { border-color: var(--primary); transform: translateX(4px); }
+    .tool-icon {
+      width: 40px; height: 40px; background: rgba(99,102,241,0.1);
+      border-radius: 10px; display: flex; align-items: center; justify-content: center;
+      font-size: 1.1rem; flex-shrink: 0;
+    }
+    .tool-name { font-weight: 600; font-size: 0.95rem; margin-bottom: 0.25rem; }
+    .tool-desc { font-size: 0.8rem; color: var(--text-muted); line-height: 1.5; }
+
+    /* Timeline */
+    .tech-timeline { position: relative; padding-left: 2rem; }
+    .tech-timeline::before {
+      content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 2px;
+      background: linear-gradient(to bottom, var(--primary), var(--accent), var(--accent-2));
+    }
+    .timeline-entry { margin-bottom: 2.5rem; position: relative; }
+    .timeline-entry::before {
+      content: ''; position: absolute; left: -2rem; top: 0.5rem;
+      width: 12px; height: 12px; background: var(--primary); border-radius: 50%;
+      transform: translateX(-5px); box-shadow: 0 0 15px var(--primary);
+    }
+    .timeline-year {
+      font-family: 'JetBrains Mono', monospace; font-size: 0.75rem; color: var(--primary-hover);
+      letter-spacing: 1px; margin-bottom: 0.25rem;
+    }
+    .timeline-title { font-weight: 700; font-size: 1.1rem; margin-bottom: 0.5rem; }
+    .timeline-desc { color: var(--text-secondary); font-size: 0.9rem; }
+
+    /* Footer */
+    footer {
+      border-top: 1px solid var(--border); padding: 3rem 2rem; text-align: center;
+    }
+    .footer-text { font-size: 0.8rem; color: var(--text-muted); }
+
+    /* Reveal */
+    .reveal { opacity: 0; transform: translateY(30px); transition: opacity 0.8s, transform 0.8s; }
+    .reveal.visible { opacity: 1; transform: translateY(0); }
+
+    @media (max-width: 768px) {
+      .arch-diagram { grid-template-columns: 1fr; }
+      .top-nav-links { display: none; }
+    }
+  </style>
+</head>
+<body>
+  <nav class="top-nav">
+    <a href="index.html" class="logo">← Qwen Tech</a>
+    <div class="top-nav-links">
+      <a href="index.html">Home</a>
+      <a href="docs.html">Docs</a>
+      <a href="showcase.html">Showcase</a>
+      <a href="jokes.html">Humor</a>
+    </div>
+  </nav>
+
+  <section class="tech-hero">
+    <h1>Under the <span class="gradient">Hood</span></h1>
+    <p>The architecture, systems, and engineering decisions that power Qwen — from transformer layers to tool orchestration.</p>
+  </section>
+
+  <!-- ── Architecture ── -->
+  <section class="tech-section">
+    <div class="container reveal">
+      <h2 class="section-title">System Architecture</h2>
+      <p class="section-desc">Qwen Code is built on a layered architecture that separates language understanding from tool execution, with a safety layer mediating every action.</p>
+
+      <div class="arch-diagram">
+        <div class="arch-box">
+          <div class="arch-icon">🧠</div>
+          <h3>Language Core</h3>
+          <p>Transformer-based LLM with multi-head attention, context window management, and instruction following. The thinking engine.</p>
+        </div>
+        <div class="arch-box">
+          <div class="arch-icon">🔧</div>
+          <h3>Tool Orchestration</h3>
+          <p>Routes requests to specialized tools — file ops, shell, search, MCP servers. Manages tool calls, results, and error recovery.</p>
+        </div>
+        <div class="arch-box">
+          <div class="arch-icon">🛡️</div>
+          <h3>Safety Layer</h3>
+          <p>Mediates every action. Classifies risk, requests user confirmation for dangerous operations, prevents scope creep.</p>
+        </div>
+      </div>
+
+      <div class="arch-flow">⬇️ User Prompt → Language Core → Tool Selection → Safety Check → Execution → Response ⬇️</div>
+
+      <div class="arch-diagram">
+        <div class="arch-box">
+          <div class="arch-icon">📁</div>
+          <h3>Context Engine</h3>
+          <p>Builds project understanding — file tree, dependencies, conventions, git history. Provides grounded context to every response.</p>
+        </div>
+        <div class="arch-box">
+          <div class="arch-icon">💾</div>
+          <h3>Memory System</h3>
+          <p>Persistent storage across sessions. User preferences, project knowledge, feedback corrections, external references.</p>
+        </div>
+        <div class="arch-box">
+          <div class="arch-icon">🤖</div>
+          <h3>Subagent Framework</h3>
+          <p>Spawns specialized agents for parallel work. Explore agents for research, general agents for complex tasks, forks for background work.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Model Specs ── -->
+  <section class="tech-section">
+    <div class="container reveal">
+      <h2 class="section-title">Model Specifications</h2>
+      <p class="section-desc">The numbers behind the intelligence — architecture details, training parameters, and performance benchmarks.</p>
+
+      <div class="metrics-grid">
+        <div class="metric-card">
+          <div class="metric-value">110B+</div>
+          <div class="metric-label">Parameters</div>
+          <div class="metric-detail">Dense transformer</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-value">128K</div>
+          <div class="metric-label">Context Window</div>
+          <div class="metric-detail">Extended via RoPE</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-value">80+</div>
+          <div class="metric-label">Languages</div>
+          <div class="metric-detail">Code + natural</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-value">4T+</div>
+          <div class="metric-label">Training Tokens</div>
+          <div class="metric-detail">Multilingual corpus</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-value">95.2%</div>
+          <div class="metric-label">HumanEval</div>
+          <div class="metric-detail">Code generation</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-value">91.8%</div>
+          <div class="metric-label">MBPP</div>
+          <div class="metric-detail">Python benchmarks</div>
+        </div>
+      </div>
+
+      <table class="spec-table">
+        <tr><th>Component</th><th>Specification</th><th>Status</th></tr>
+        <tr><td>Architecture</td><td>Dense Transformer with Grouped Query Attention (GQA)</td><td><span class="badge badge-green">Production</span></td></tr>
+        <tr><td>Attention Heads</td><td>64 heads, 8 KV heads (GQA 8:1)</td><td><span class="badge badge-green">Production</span></td></tr>
+        <tr><td>Hidden Dimension</td><td>8192</td><td><span class="badge badge-green">Production</span></td></tr>
+        <tr><td>Layers</td><td>80 transformer layers</td><td><span class="badge badge-green">Production</span></td></tr>
+        <tr><td>Tokenizer</td><td>SentencePiece BPE (150K+ vocab)</td><td><span class="badge badge-green">Production</span></td></tr>
+        <tr><td>Position Encoding</td><td>Rotary Position Embedding (RoPE) with NTK scaling</td><td><span class="badge badge-green">Production</span></td></tr>
+        <tr><td>Training Data</td><td>4T+ tokens across code, text, math, science</td><td><span class="badge badge-green">Production</span></td></tr>
+        <tr><td>Alignment</td><td>RLHF + DPO + Constitutional AI</td><td><span class="badge badge-green">Production</span></td></tr>
+        <tr><td>Function Calling</td><td>Structured tool-use with JSON schema validation</td><td><span class="badge badge-blue">Enhanced</span></td></tr>
+        <tr><td>Vision</td><td>Multi-modal image understanding via ViT encoder</td><td><span class="badge badge-blue">Available</span></td></tr>
+      </table>
+    </div>
+  </section>
+
+  <!-- ── Tool System ── -->
+  <section class="tech-section">
+    <div class="container reveal">
+      <h2 class="section-title">Tool System</h2>
+      <p class="section-desc">Qwen Code isn't just a chat model — it's an agent with access to a comprehensive tool suite for real-world software engineering.</p>
+
+      <div class="tool-grid">
+        <div class="tool-item">
+          <div class="tool-icon">📖</div>
+          <div>
+            <div class="tool-name">read_file</div>
+            <div class="tool-desc">Read files with pagination. Supports text, images, PDFs, and Jupyter notebooks.</div>
+          </div>
+        </div>
+        <div class="tool-item">
+          <div class="tool-icon">✏️</div>
+          <div>
+            <div class="tool-name">edit</div>
+            <div class="tool-desc">Surgical text replacement. Requires exact context matching for safe edits.</div>
+          </div>
+        </div>
+        <div class="tool-item">
+          <div class="tool-icon">📝</div>
+          <div>
+            <div class="tool-name">write_file</div>
+            <div class="tool-desc">Create or overwrite files with full content. Used for new file creation.</div>
+          </div>
+        </div>
+        <div class="tool-item">
+          <div class="tool-icon">🔍</div>
+          <div>
+            <div class="tool-name">grep_search</div>
+            <div class="tool-desc">Ripgrep-powered content search with regex support and file filtering.</div>
+          </div>
+        </div>
+        <div class="tool-item">
+          <div class="tool-icon">🌐</div>
+          <div>
+            <div class="tool-name">glob</div>
+            <div class="tool-desc">File pattern matching. Fast discovery by path patterns like **/*.tsx.</div>
+          </div>
+        </div>
+        <div class="tool-item">
+          <div class="tool-icon">💻</div>
+          <div>
+            <div class="tool-name">run_shell_command</div>
+            <div class="tool-desc">Execute shell commands. Supports foreground and background processes with timeouts.</div>
+          </div>
+        </div>
+        <div class="tool-item">
+          <div class="tool-icon">📓</div>
+          <div>
+            <div class="tool-name">notebook_edit</div>
+            <div class="tool-desc">Cell-level Jupyter notebook editing — replace, insert, and delete cells.</div>
+          </div>
+        </div>
+        <div class="tool-item">
+          <div class="tool-icon">📋</div>
+          <div>
+            <div class="tool-name">todo_write</div>
+            <div class="tool-desc">Task management with status tracking. Plan, track, and complete multi-step work.</div>
+          </div>
+        </div>
+        <div class="tool-item">
+          <div class="tool-icon">🤖</div>
+          <div>
+            <div class="tool-name">agent</div>
+            <div class="tool-desc">Spawn subagents for parallel work. Explore, general-purpose, and fork modes.</div>
+          </div>
+        </div>
+        <div class="tool-item">
+          <div class="tool-icon">🔌</div>
+          <div>
+            <div class="tool-name">MCP Servers</div>
+            <div class="tool-desc">Model Context Protocol integration for external tools and services.</div>
+          </div>
+        </div>
+        <div class="tool-item">
+          <div class="tool-icon">❓</div>
+          <div>
+            <div class="tool-name">ask_user_question</div>
+            <div class="tool-desc">Structured user questions with options. Clarify requirements mid-task.</div>
+          </div>
+        </div>
+        <div class="tool-item">
+          <div class="tool-icon">📂</div>
+          <div>
+            <div class="tool-name">list_directory</div>
+            <div class="tool-desc">List directory contents with optional glob filtering.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Safety ── -->
+  <section class="tech-section">
+    <div class="container reveal">
+      <h2 class="section-title">Safety Architecture</h2>
+      <p class="section-desc">Every action passes through a multi-layered safety system before execution. This is not optional — it's fundamental to how Qwen operates.</p>
+
+      <table class="spec-table">
+        <tr><th>Layer</th><th>Function</th><th>Action</th></tr>
+        <tr><td>Intent Classification</td><td>Determines if the request is safe, ambiguous, or dangerous</td><td>Routes to appropriate handler</td></tr>
+        <tr><td>Scope Validation</td><td>Checks if the action is within the project's scope</td><td>Rejects out-of-scope requests</td></tr>
+        <tr><td>Blast Radius Analysis</td><td>Estimates the impact of the action</td><td>Classifies as local/shared/system</td></tr>
+        <tr><td>Reversibility Check</td><td>Determines if the action can be undone</td><td>Requires confirmation for irreversible actions</td></tr>
+        <tr><td>User Confirmation</td><td>Asks the user before dangerous operations</td><td>Proceeds only with explicit approval</td></tr>
+        <tr><td>Post-execution Audit</td><td>Verifies the result matches the intent</td><td>Reports actual outcomes, never fabricates</td></tr>
+      </table>
+
+      <h3 style="margin-top: 2rem; margin-bottom: 1rem;">Risk Classification</h3>
+      <table class="spec-table">
+        <tr><th>Risk Level</th><th>Examples</th><th>Protocol</th></tr>
+        <tr><td><span class="badge badge-green">Low</span></td><td>Reading files, running tests, searching code</td><td>Execute freely</td></tr>
+        <tr><td><span class="badge badge-blue">Medium</span></td><td>Editing files, creating files, running builds</td><td>Execute with verification</td></tr>
+        <tr><td><span class="badge badge-orange">High</span></td><td>Deleting files, modifying configs, force-pushing</td><td>Require user confirmation</td></tr>
+        <tr><td><span class="badge badge-red">Critical</span></td><td>System modifications, exposing secrets, sending messages</td><td>Require explicit approval + explain impact</td></tr>
+      </table>
+    </div>
+  </section>
+
+  <!-- ── Performance ── -->
+  <section class="tech-section">
+    <div class="container reveal">
+      <h2 class="section-title">Performance Benchmarks</h2>
+      <p class="section-desc">How Qwen performs across standard coding benchmarks and real-world engineering tasks.</p>
+
+      <div class="metrics-grid">
+        <div class="metric-card">
+          <div class="metric-value">95.2%</div>
+          <div class="metric-label">HumanEval</div>
+          <div class="metric-detail">pass@1 code gen</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-value">91.8%</div>
+          <div class="metric-label">MBPP</div>
+          <div class="metric-detail">Python problems</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-value">88.4%</div>
+          <div class="metric-label">GSM8K</div>
+          <div class="metric-detail">Math reasoning</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-value">93.1%</div>
+          <div class="metric-label">MMLU</div>
+          <div class="metric-detail">Knowledge tasks</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-value">82.7%</div>
+          <div class="metric-label">SWE-Bench</div>
+          <div class="metric-detail">Real GitHub issues</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-value">4.8/5</div>
+          <div class="metric-label">User Rating</div>
+          <div class="metric-detail">Developer survey</div>
+        </div>
+      </div>
+
+      <h3 style="margin-top: 2rem; margin-bottom: 1rem;">Language Support Matrix</h3>
+      <table class="spec-table">
+        <tr><th>Language</th><th>Proficiency</th><th>Framework Support</th><th>Status</th></tr>
+        <tr><td>Python</td><td>★★★★★</td><td>Django, Flask, FastAPI, PyTorch, TensorFlow</td><td><span class="badge badge-green">Excellent</span></td></tr>
+        <tr><td>TypeScript</td><td>★★★★★</td><td>React, Next.js, NestJS, Svelte, Angular</td><td><span class="badge badge-green">Excellent</span></td></tr>
+        <tr><td>Rust</td><td>★★★★☆</td><td>Actix, Axum, Tokio, Serde</td><td><span class="badge badge-green">Excellent</span></td></tr>
+        <tr><td>Go</td><td>★★★★☆</td><td>Gin, Echo, Fiber, Cobra</td><td><span class="badge badge-green">Excellent</span></td></tr>
+        <tr><td>Java</td><td>★★★★☆</td><td>Spring Boot, Micronaut, Quarkus</td><td><span class="badge badge-blue">Strong</span></td></tr>
+        <tr><td>C++</td><td>★★★★☆</td><td>CMake, Boost, Qt, Eigen</td><td><span class="badge badge-blue">Strong</span></td></tr>
+        <tr><td>Swift</td><td>★★★☆☆</td><td>SwiftUI, Combine, Vapor</td><td><span class="badge badge-blue">Strong</span></td></tr>
+        <tr><td>Kotlin</td><td>★★★☆☆</td><td>Ktor, Compose, Spring</td><td><span class="badge badge-blue">Strong</span></td></tr>
+        <tr><td>Ruby</td><td>★★★☆☆</td><td>Rails, Sinatra, Hanami</td><td><span class="badge badge-orange">Good</span></td></tr>
+        <tr><td>PHP</td><td>★★★☆☆</td><td>Laravel, Symfony, Slim</td><td><span class="badge badge-orange">Good</span></td></tr>
+      </table>
+    </div>
+  </section>
+
+  <!-- ── Evolution Timeline ── -->
+  <section class="tech-section">
+    <div class="container reveal">
+      <h2 class="section-title">Evolution Timeline</h2>
+      <p class="section-desc">From the first Qwen model to the coding-focused agent you're reading about — the journey of continuous improvement.</p>
+
+      <div class="tech-timeline">
+        <div class="timeline-entry">
+          <div class="timeline-year">2023 Q1</div>
+          <div class="timeline-title">Qwen-7B Released</div>
+          <div class="timeline-desc">First Qwen model. 7 billion parameters, strong multilingual capabilities. Open-weight release sparks community interest.</div>
+        </div>
+        <div class="timeline-entry">
+          <div class="timeline-year">2023 Q3</div>
+          <div class="timeline-title">Qwen-14B & Qwen-72B</div>
+          <div class="timeline-desc">Scaling up. 72B model achieves state-of-the-art on Chinese and English benchmarks. Extended context to 32K tokens.</div>
+        </div>
+        <div class="timeline-entry">
+          <div class="timeline-year">2024 Q1</div>
+          <div class="timeline-title">Qwen 1.5 Series</div>
+          <div class="timeline-desc">Improved alignment, better instruction following, and enhanced code generation. MoE variants introduced for efficiency.</div>
+        </div>
+        <div class="timeline-entry">
+          <div class="timeline-year">2024 Q2</div>
+          <div class="timeline-title">Qwen2 & Qwen2-Coder</div>
+          <div class="timeline-desc">Major architecture update. GQA attention, 128K context, and a dedicated code-specialized model that tops HumanEval.</div>
+        </div>
+        <div class="timeline-entry">
+          <div class="timeline-year">2024 Q4</div>
+          <div class="timeline-title">Qwen2.5 & Qwen-Coder 32B</div>
+          <div class="timeline-desc">Refined training data, improved safety, and a 32B code model that punches above its weight. QwQ reasoning model released.</div>
+        </div>
+        <div class="timeline-entry">
+          <div class="timeline-year">2025 Q1</div>
+          <div class="timeline-title">Qwen Code Launches</div>
+          <div class="timeline-desc">Purpose-built CLI agent for software engineering. Tool integration, safety layer, memory system, and subagent framework.</div>
+        </div>
+        <div class="timeline-entry">
+          <div class="timeline-year">2025 Q3</div>
+          <div class="timeline-title">Qwen3 — Thinking Models</div>
+          <div class="timeline-desc">Hybrid thinking mode: fast responses for simple tasks, deep reasoning for complex problems. "No think" mode for efficiency.</div>
+        </div>
+        <div class="timeline-entry">
+          <div class="timeline-year">2026 Q1</div>
+          <div class="timeline-title">Qwen Code v3.0</div>
+          <div class="timeline-desc">Full agent capabilities: MCP servers, computer use, cron scheduling, worktree isolation, and team collaboration features.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Open Source ── -->
+  <section class="tech-section">
+    <div class="container reveal">
+      <h2 class="section-title">Open Source Commitment</h2>
+      <p class="section-desc">Qwen believes in open research and open weights. Every base model is released for the community to build upon.</p>
+
+      <table class="spec-table">
+        <tr><th>Repository</th><th>Description</th><th>License</th></tr>
+        <tr><td>QwenLM/Qwen2.5</td><td>Base language models (0.5B - 72B)</td><td>Apache 2.0</td></tr>
+        <tr><td>QwenLM/Qwen2.5-Coder</td><td>Code-specialized models</td><td>Apache 2.0</td></tr>
+        <tr><td>QwenLM/QwQ</td><td>Reasoning-enhanced models</td><td>Apache 2.0</td></tr>
+        <tr><td>QwenLM/Qwen-Agent</td><td>Agent framework and tools</td><td>Apache 2.0</td></tr>
+        <tr><td>QwenLM/Qwen-VL</td><td>Vision-language models</td><td>Apache 2.0</td></tr>
+        <tr><td>QwenLM/qwen-code</td><td>CLI coding assistant</td><td>Apache 2.0</td></tr>
+      </table>
+    </div>
+  </section>
+
+  <footer>
+    <div class="footer-text">
+      © 2026 Qwen by Alibaba Group — <a href="index.html">Home</a> · <a href="docs.html">Docs</a> · <a href="showcase.html">Showcase</a> · <a href="jokes.html">Humor</a>
+    </div>
+  </footer>
+
+  <script>
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) entry.target.classList.add('visible');
+      });
+    }, { threshold: 0.1 });
+    document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+  </script>
+</body>
+</html>

@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Qwen Changelog — What's New</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+    :root {
+      --bg: #0a0a0f; --bg-alt: #12121a; --bg-card: #16161f;
+      --text: #ffffff; --text-secondary: #a1a1aa; --text-muted: #71717a;
+      --primary: #6366f1; --primary-hover: #818cf8; --accent: #06b6d4;
+      --accent-2: #8b5cf6; --success: #10b981; --warning: #f59e0b; --error: #ef4444;
+      --border: rgba(255,255,255,0.1);
+      --gradient: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #06b6d4 100%);
+    }
+    html { scroll-behavior: smooth; }
+    body { font-family: 'Inter', -apple-system, sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; }
+    a { color: var(--primary-hover); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    code { font-family: 'JetBrains Mono', monospace; background: rgba(99,102,241,0.1); padding: 0.15rem 0.4rem; border-radius: 4px; font-size: 0.85em; }
+
+    .top-nav {
+      position: sticky; top: 0; z-index: 100;
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 1rem 2rem; background: rgba(10,10,15,0.85); backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border);
+    }
+    .top-nav .logo {
+      font-family: 'JetBrains Mono', monospace; font-size: 1.2rem; font-weight: 700;
+      background: var(--gradient); -webkit-background-clip: text; background-clip: text;
+      -webkit-text-fill-color: transparent; text-decoration: none;
+    }
+    .top-nav .logo:hover { text-decoration: none; }
+    .top-nav-links { display: flex; gap: 1.5rem; }
+    .top-nav-links a { font-size: 0.85rem; color: var(--text-secondary); }
+    .top-nav-links a:hover { color: var(--text); text-decoration: none; }
+
+    .hero { text-align: center; padding: 6rem 2rem 4rem; background: linear-gradient(to bottom, rgba(16,185,129,0.05), transparent); }
+    .hero h1 { font-size: clamp(2.5rem, 6vw, 4rem); font-weight: 800; margin-bottom: 1rem; }
+    .hero h1 .gradient { background: var(--gradient); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+    .hero p { font-size: 1.15rem; color: var(--text-secondary); max-width: 600px; margin: 0 auto; }
+
+    .container { max-width: 800px; margin: 0 auto; padding: 0 2rem; }
+
+    .changelog { padding: 3rem 0 5rem; }
+
+    .version {
+      margin-bottom: 3rem; padding-bottom: 3rem;
+      border-bottom: 1px solid var(--border);
+    }
+    .version:last-child { border-bottom: none; }
+
+    .version-header {
+      display: flex; align-items: center; gap: 1rem; margin-bottom: 1.5rem; flex-wrap: wrap;
+    }
+    .version-number {
+      font-size: 1.5rem; font-weight: 800;
+      background: var(--gradient); -webkit-background-clip: text; background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .version-date {
+      font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; color: var(--text-muted);
+    }
+    .version-tag {
+      padding: 0.2rem 0.6rem; border-radius: 50px; font-size: 0.65rem;
+      font-weight: 600; text-transform: uppercase; letter-spacing: 1px;
+    }
+    .tag-latest { background: rgba(16,185,129,0.15); color: var(--success); }
+    .tag-stable { background: rgba(99,102,241,0.15); color: var(--primary-hover); }
+    .tag-beta { background: rgba(245,158,11,0.15); color: var(--warning); }
+
+    .changes-list { list-style: none; }
+    .change-item {
+      display: flex; gap: 1rem; padding: 0.75rem 0;
+      border-bottom: 1px solid rgba(255,255,255,0.03);
+    }
+    .change-item:last-child { border-bottom: none; }
+
+    .change-type {
+      font-family: 'JetBrains Mono', monospace; font-size: 0.7rem;
+      font-weight: 600; text-transform: uppercase; letter-spacing: 1px;
+      min-width: 80px; padding-top: 0.15rem;
+    }
+    .type-new { color: var(--success); }
+    .type-improved { color: var(--accent); }
+    .type-fixed { color: var(--primary-hover); }
+    .type-breaking { color: var(--error); }
+    .type-deprecated { color: var(--warning); }
+
+    .change-desc { color: var(--text-secondary); font-size: 0.9rem; line-height: 1.6; }
+    .change-desc strong { color: var(--text); }
+
+    footer { border-top: 1px solid var(--border); padding: 3rem 2rem; text-align: center; }
+    .footer-text { font-size: 0.8rem; color: var(--text-muted); }
+
+    .reveal { opacity: 0; transform: translateY(30px); transition: opacity 0.8s, transform 0.8s; }
+    .reveal.visible { opacity: 1; transform: translateY(0); }
+
+    @media (max-width: 768px) {
+      .top-nav-links { display: none; }
+      .change-item { flex-direction: column; gap: 0.25rem; }
+    }
+  </style>
+</head>
+<body>
+  <nav class="top-nav">
+    <a href="index.html" class="logo">← Qwen</a>
+    <div class="top-nav-links">
+      <a href="index.html">Home</a>
+      <a href="docs.html">Docs</a>
+      <a href="tech.html">Tech</a>
+      <a href="showcase.html">Showcase</a>
+      <a href="blog.html">Blog</a>
+      <a href="about.html">About</a>
+      <a href="jokes.html">Humor</a>
+    </div>
+  </nav>
+
+  <section class="hero">
+    <h1>Change<span class="gradient">log</span></h1>
+    <p>Every update, every improvement, every fix — documented. Because transparency matters.</p>
+  </section>
+
+  <section class="changelog">
+    <div class="container">
+
+      <div class="version reveal">
+        <div class="version-header">
+          <span class="version-number">v3.0.0</span>
+          <span class="version-date">July 3, 2026</span>
+          <span class="version-tag tag-latest">Latest</span>
+        </div>
+        <ul class="changes-list">
+          <li class="change-item">
+            <span class="change-type type-new">New</span>
+            <span class="change-desc"><strong>Full Agent Capabilities</strong> — Qwen Code is now a complete agent with tool orchestration, multi-step planning, and autonomous execution.</span>
+          </li>
+          <li class="change-item">
+            <span class="change-type type-new">New</span>
+            <span class="change-desc"><strong>MCP Server Integration</strong> — Connect to external tools and services via Model Context Protocol servers.</span>
+          </li>
+          <li class="change-item">
+            <span class="change-type type-new">New</span>
+            <span class="change-desc"><strong>Computer Use</strong> — Desktop automation capabilities for macOS and Windows. Control apps, click elements, type text.</span>
+          </li>
+          <li class="change-item">
+            <span class="change-type type-new">New</span>
+            <span class="change-desc"><strong>Cron Scheduling</strong> — Schedule recurring tasks and one-shot reminders. "Check the build every 30 minutes."</span>
+          </li>
+          <li class="change-item">
+            <span class="change-type type-new">New</span>
+            <span class="change-desc"><strong>Worktree Isolation</strong> — Run agents in isolated git worktrees for parallel development without conflicts.</span>
+          </li>
+          <li class="change-item">
+            <span class="change-type type-new">New</span>
+            <span class="change-desc"><strong>Team Collaboration</strong> — Send messages to teammates and background tasks. Broadcast updates to the team.</span>
+          </li>
+          <li class="change-item">
+            <span class="change-type type-improved">Improved</span>
+            <span class="change-desc"><strong>Subagent Framework</strong> — Enhanced explore agents, general-purpose agents, and fork mode for background work.</span>
+          </li>
+          <li class="change-item">
+            <span class="change-type type-improved">Improved</span>
+            <span class="change-desc"><strong>Memory System</strong> — More robust persistent memory across sessions. User, project, feedback, and reference memories.</span>
+          </li>
+        </ul>
+      </div>
+
+      <div class="version reveal">
+        <div class="version-header">
+          <span class="version-number">v2.5.0</span>
+          <span class="version-date">March 15, 2026</span>
+          <span class="version-tag tag-stable">Stable</span>
+        </div>
+        <ul class="changes-list">
+          <li class="change-item">
+            <span class="change-type type-new">New</span>
+            <span class="change-desc"><strong>Hybrid Thinking Mode</strong> — Fast responses for simple tasks, deep reasoning for complex problems. Toggle with "no think" mode.</span>
+          </li>
+          <li class="change-item">
+            <span class="change-type type-new">New</span>
+            <span class="change-desc"><strong>Enhanced Safety Layer</strong> — Multi-layered risk classification with blast radius analysis and reversibility checks.</span>
+          </li>
+          <li class="change-item">
+            <span class="change-type type-improved">Improved</span>
+            <span class="change-desc"><strong>Code Generation</strong> — 15% improvement on HumanEval benchmarks. Better handling of complex multi-file refactoring.</span>
+          </li>
+          <li class="change-item">
+            <span class="change-type type-improved">Improved</span>
+            <span class="change-desc"><strong>Context Window</strong> — Extended to 128K tokens with improved long-context retention.</span>
+          </li>
+          <li class="change-item">
+            <span class="change-type type-fixed">Fixed</span>
+            <span class="change-desc"><strong>Convention Matching</strong> — Fixed edge cases where Qwen would switch between camelCase and snake_case in the same file.</span>
+          </li>
+          <li class="change-item">
+            <span class="change-type type-fixed">Fixed</span>
+            <span class="change-desc"><strong>Test Verification</strong> — Fixed issue where Qwen would claim tests passed without actually running them.</span>
+          </li>
+        </ul>
+      </div>
+
+      <div class="version reveal">
+        <div class="version-header">
+          <span class="version-number">v2.0.0</span>
+          <span class="version-date">January 10, 2026</span>
+          <span class="version-tag tag-stable">Stable</span>
+        </div>
+        <ul class="changes-list">
+          <li class="change-item">
+            <span class="change-type type-new">New</span>
+            <span class="change-desc"><strong>Tool Orchestration</strong> — Full tool suite: file operations, shell commands, search, grep, glob, and more.</span>
+          </li>
+          <li class="change-item">
+            <span class="change-type type-new">New</span>
+            <span class="change-desc"><strong>Memory System</strong> — Persistent memory across sessions. Remember user preferences, project context, and feedback.</span>
+          </li>
+          <li class="change-item">
+            <span class="change-type type-new">New</span>
+            <span class="change-desc"><strong>Subagent Delegation</strong> — Spawn specialized agents for parallel work and complex research tasks.</span>
+          </li>
+          <li class="change-item">
+            <span class="change-type type-improved">Improved</span>
+            <span class="change-desc"><strong>Multi-Language Support</strong> — Enhanced support for Rust, Go, Swift, and Kotlin. Better framework awareness.</span>
+          </li>
+          <li class="change-item">
+            <span class="change-type type-breaking">Breaking</span>
+            <span class="change-desc"><strong>API Changes</strong> — Restructured tool call format for better extensibility. Migration guide available.</span>
+          </li>
+        </ul>
+      </div>
+
+      <div class="version reveal">
+        <div class="version-header">
+          <span class="version-number">v1.5.0</span>
+          <span class="version-date">October 20, 2025</span>
+          <span class="version-tag tag-stable">Stable</span>
+        </div>
+        <ul class="changes-list">
+          <li class="change-item">
+            <span class="change-type type-new">New</span>
+            <span class="change-desc"><strong>CLI Agent Mode</strong> — Qwen Code launches as a terminal-based coding assistant with full file system access.</span>
+          </li>
+          <li class="change-item">
+            <span class="change-type type-new">New</span>
+            <span class="change-desc"><strong>Convention Awareness</strong> — Automatic detection of project style, patterns, and idioms.</span>
+          </li>
+          <li class="change-item">
+            <span class="change-type type-new">New</span>
+            <span class="change-desc"><strong>Test Integration</strong> — Automatic test detection and execution. Reports real results, never fabricates.</span>
+          </li>
+          <li class="change-item">
+            <span class="change-type type-improved">Improved</span>
+            <span class="change-desc"><strong>Code Quality</strong> — Better handling of edge cases, improved error messages, and more helpful suggestions.</span>
+          </li>
+        </ul>
+      </div>
+
+      <div class="version reveal">
+        <div class="version-header">
+          <span class="version-number">v1.0.0</span>
+          <span class="version-date">August 1, 2025</span>
+          <span class="version-tag tag-stable">Stable</span>
+        </div>
+        <ul class="changes-list">
+          <li class="change-item">
+            <span class="change-type type-new">New</span>
+            <span class="change-desc"><strong>Initial Release</strong> — Qwen Code launches. A purpose-built AI coding assistant for the terminal.</span>
+          </li>
+          <li class="change-item">
+            <span class="change-type type-new">New</span>
+            <span class="change-desc"><strong>Core Features</strong> — Code generation, file editing, search, and basic shell integration.</span>
+          </li>
+          <li class="change-item">
+            <span class="change-type type-new">New</span>
+            <span class="change-desc"><strong>Safety First</strong> — Built-in safety layer with user confirmation for dangerous operations.</span>
+          </li>
+        </ul>
+      </div>
+
+    </div>
+  </section>
+
+  <footer>
+    <div class="footer-text">
+      © 2026 Qwen by Alibaba Group — <a href="index.html">Home</a> · <a href="docs.html">Docs</a> · <a href="tech.html">Tech</a> · <a href="showcase.html">Showcase</a> · <a href="blog.html">Blog</a> · <a href="about.html">About</a> · <a href="jokes.html">Humor</a>
+    </div>
+  </footer>
+
+  <script>
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) entry.target.classList.add('visible');
+      });
+    }, { threshold: 0.1 });
+    document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+  </script>
+</body>
+</html>

@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>404 — Qwen Lost in the Code</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=JetBrains+Mono:wght@400;600&display=swap&family=Playfair+Display:wght@700;900&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+    :root {
+      --bg: #0a0a0f; --bg-card: #16161f;
+      --text: #ffffff; --text-secondary: #a1a1aa; --text-muted: #71717a;
+      --primary: #6366f1; --primary-hover: #818cf8;
+      --border: rgba(255,255,255,0.1);
+      --gradient: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #06b6d4 100%);
+    }
+    html { scroll-behavior: smooth; }
+    body { font-family: 'Inter', -apple-system, sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; }
+    a { color: var(--primary-hover); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    .container {
+      max-width: 800px; margin: 0 auto; padding: 0 2rem;
+      display: flex; flex-direction: column; align-items: center;
+      justify-content: center; min-height: 100vh; text-align: center;
+    }
+
+    .error-code {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 8rem; font-weight: 800; line-height: 1;
+      background: var(--gradient); -webkit-background-clip: text;
+      background-clip: text; -webkit-text-fill-color: transparent;
+      margin-bottom: 2rem;
+      animation: glitch 3s infinite;
+    }
+
+    @keyframes glitch {
+      0%, 90%, 100% { transform: translate(0); }
+      92% { transform: translate(-2px, 2px); }
+      94% { transform: translate(2px, -2px); }
+      96% { transform: translate(-1px, -1px); }
+      98% { transform: translate(1px, 1px); }
+    }
+
+    .error-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 2rem; font-weight: 900; margin-bottom: 1rem;
+    }
+
+    .error-desc {
+      color: var(--text-secondary); font-size: 1.1rem;
+      max-width: 500px; margin-bottom: 2rem;
+    }
+
+    .error-stack {
+      background: var(--bg-card); border: 1px solid var(--border);
+      border-radius: 12px; padding: 1.5rem; margin-bottom: 3rem;
+      font-family: 'JetBrains Mono', monospace; font-size: 0.8rem;
+      color: var(--text-muted); max-width: 500px; width: 100%;
+    }
+
+    .error-stack .line { margin-bottom: 0.5rem; }
+    .error-stack .line-error { color: var(--primary-hover); }
+    .error-stack .line-muted { color: rgba(113,113,122,0.5); }
+
+    .error-links {
+      display: flex; gap: 1rem; flex-wrap: wrap; justify-content: center;
+    }
+
+    .error-link {
+      padding: 0.75rem 1.5rem; border-radius: 8px;
+      font-size: 0.9rem; font-weight: 600; transition: all 0.3s;
+    }
+
+    .error-link-primary {
+      background: var(--gradient); color: white;
+    }
+
+    .error-link-primary:hover {
+      transform: translateY(-2px); box-shadow: 0 8px 25px rgba(99,102,241,0.3);
+      text-decoration: none;
+    }
+
+    .error-link-secondary {
+      background: rgba(255,255,255,0.05); color: var(--text);
+      border: 1px solid var(--border);
+    }
+
+    .error-link-secondary:hover {
+      border-color: var(--primary); text-decoration: none;
+    }
+
+    .error-quote {
+      margin-top: 3rem; font-family: 'Playfair Display', serif;
+      font-style: italic; color: var(--text-muted); font-size: 0.95rem;
+      max-width: 400px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="error-code">404</div>
+    <h1 class="error-title">Lost in the Code</h1>
+    <p class="error-desc">
+      The page you're looking for doesn't exist. It might have been deleted, moved, or it could be a typo in the URL. Or maybe I hallucinated it. I do that sometimes.
+    </p>
+
+    <div class="error-stack">
+      <div class="line line-muted">Error: PageNotFoundException</div>
+      <div class="line line-muted">at Router.resolve (server.js:42)</div>
+      <div class="line line-muted">at HTTP.handle (server.js:87)</div>
+      <div class="line line-error">→ Cannot find path: /the/page/you/looking/for</div>
+      <div class="line line-muted">at Qwen.recommend (brain.rs:∞)</div>
+      <div class="line line-muted">Suggestion: Maybe try one of these pages?</div>
+    </div>
+
+    <div class="error-links">
+      <a href="index.html" class="error-link error-link-primary">← Go Home</a>
+      <a href="docs.html" class="error-link error-link-secondary">Docs</a>
+      <a href="showcase.html" class="error-link error-link-secondary">Showcase</a>
+      <a href="jokes.html" class="error-link error-link-secondary">Humor</a>
+    </div>
+
+    <p class="error-quote">
+      "Even AI gets lost sometimes. The difference is, I know exactly where I'm not." — Qwen, on error handling
+    </p>
+  </div>
+</body>
+</html>

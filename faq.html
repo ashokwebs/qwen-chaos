@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Qwen FAQ — Frequently Asked Questions</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+    :root {
+      --bg: #0a0a0f; --bg-alt: #12121a; --bg-card: #16161f;
+      --text: #ffffff; --text-secondary: #a1a1aa; --text-muted: #71717a;
+      --primary: #6366f1; --primary-hover: #818cf8; --accent: #06b6d4;
+      --accent-2: #8b5cf6; --success: #10b981; --warning: #f59e0b; --error: #ef4444;
+      --border: rgba(255,255,255,0.1);
+      --gradient: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #06b6d4 100%);
+    }
+    html { scroll-behavior: smooth; }
+    body { font-family: 'Inter', -apple-system, sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; }
+    a { color: var(--primary-hover); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    code { font-family: 'JetBrains Mono', monospace; background: rgba(99,102,241,0.1); padding: 0.15rem 0.4rem; border-radius: 4px; font-size: 0.85em; }
+
+    .top-nav {
+      position: sticky; top: 0; z-index: 100;
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 1rem 2rem; background: rgba(10,10,15,0.85); backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border);
+    }
+    .top-nav .logo {
+      font-family: 'JetBrains Mono', monospace; font-size: 1.2rem; font-weight: 700;
+      background: var(--gradient); -webkit-background-clip: text; background-clip: text;
+      -webkit-text-fill-color: transparent; text-decoration: none;
+    }
+    .top-nav .logo:hover { text-decoration: none; }
+    .top-nav-links { display: flex; gap: 1.5rem; }
+    .top-nav-links a { font-size: 0.85rem; color: var(--text-secondary); }
+    .top-nav-links a:hover { color: var(--text); text-decoration: none; }
+
+    .hero { text-align: center; padding: 6rem 2rem 4rem; background: linear-gradient(to bottom, rgba(6,182,212,0.05), transparent); }
+    .hero h1 { font-size: clamp(2.5rem, 6vw, 4rem); font-weight: 800; margin-bottom: 1rem; }
+    .hero h1 .gradient { background: var(--gradient); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+    .hero p { font-size: 1.15rem; color: var(--text-secondary); max-width: 600px; margin: 0 auto; }
+
+    .container { max-width: 800px; margin: 0 auto; padding: 0 2rem; }
+
+    /* Categories */
+    .faq-nav {
+      display: flex; gap: 0.75rem; justify-content: center; flex-wrap: wrap;
+      margin-bottom: 3rem; padding: 2rem 0;
+    }
+    .faq-nav-btn {
+      padding: 0.5rem 1.25rem; background: rgba(255,255,255,0.05);
+      border: 1px solid var(--border); border-radius: 50px; color: var(--text-secondary);
+      font-size: 0.85rem; font-weight: 500; cursor: pointer; transition: all 0.3s;
+    }
+    .faq-nav-btn:hover, .faq-nav-btn.active {
+      background: var(--primary); border-color: var(--primary); color: white;
+    }
+
+    /* FAQ Items */
+    .faq-category { margin-bottom: 3rem; }
+    .faq-category-title {
+      font-size: 1.3rem; font-weight: 700; margin-bottom: 1.5rem;
+      display: flex; align-items: center; gap: 0.5rem;
+    }
+    .faq-category-title .cat-icon { font-size: 1.5rem; }
+
+    .faq-item {
+      background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px;
+      margin-bottom: 1rem; overflow: hidden; transition: border-color 0.3s;
+    }
+    .faq-item:hover { border-color: var(--primary); }
+    .faq-item.open { border-color: var(--primary); }
+
+    .faq-question {
+      padding: 1.25rem 1.5rem; cursor: pointer;
+      display: flex; justify-content: space-between; align-items: center;
+      font-weight: 600; font-size: 0.95rem; transition: all 0.3s;
+    }
+    .faq-item.open .faq-question { color: var(--primary-hover); }
+    .faq-toggle {
+      font-size: 1.2rem; color: var(--text-muted); transition: transform 0.3s;
+    }
+    .faq-item.open .faq-toggle { transform: rotate(180deg); color: var(--primary); }
+
+    .faq-answer {
+      padding: 0 1.5rem; max-height: 0; overflow: hidden;
+      transition: max-height 0.4s ease, padding 0.4s;
+      color: var(--text-secondary); font-size: 0.9rem; line-height: 1.7;
+    }
+    .faq-item.open .faq-answer {
+      padding: 0 1.5rem 1.5rem; max-height: 500px;
+    }
+
+    /* CTA */
+    .faq-cta {
+      text-align: center; padding: 4rem 2rem;
+      border-top: 1px solid var(--border);
+    }
+    .faq-cta h2 { font-size: 1.8rem; font-weight: 800; margin-bottom: 1rem; }
+    .faq-cta p { color: var(--text-secondary); margin-bottom: 2rem; }
+    .faq-cta .btn {
+      display: inline-block; padding: 0.75rem 2rem; background: var(--gradient);
+      color: white; border-radius: 50px; font-weight: 600; font-size: 0.9rem;
+      transition: all 0.3s;
+    }
+    .faq-cta .btn:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(99,102,241,0.3); }
+
+    footer { border-top: 1px solid var(--border); padding: 3rem 2rem; text-align: center; }
+    .footer-text { font-size: 0.8rem; color: var(--text-muted); }
+
+    .reveal { opacity: 0; transform: translateY(30px); transition: opacity 0.8s, transform 0.8s; }
+    .reveal.visible { opacity: 1; transform: translateY(0); }
+
+    @media (max-width: 768px) { .top-nav-links { display: none; } }
+  </style>
+</head>
+<body>
+  <nav class="top-nav">
+    <a href="index.html" class="logo">← Qwen</a>
+    <div class="top-nav-links">
+      <a href="index.html">Home</a>
+      <a href="docs.html">Docs</a>
+      <a href="tech.html">Tech</a>
+      <a href="showcase.html">Showcase</a>
+      <a href="blog.html">Blog</a>
+      <a href="about.html">About</a>
+      <a href="jokes.html">Humor</a>
+    </div>
+  </nav>
+
+  <section class="hero">
+    <h1>Frequently Asked <span class="gradient">Questions</span></h1>
+    <p>Everything you wanted to know about Qwen but were too afraid to ask. (We won't judge. We're an AI.)</p>
+  </section>
+
+  <section style="padding: 0 0 2rem;">
+    <div class="container">
+      <div class="faq-nav">
+        <div class="faq-nav-btn active" data-cat="general">General</div>
+        <div class="faq-nav-btn" data-cat="coding">Coding</div>
+        <div class="faq-nav-btn" data-cat="safety">Safety</div>
+        <div class="faq-nav-btn" data-cat="technical">Technical</div>
+        <div class="faq-nav-btn" data-cat="philosophy">Philosophy</div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="container">
+
+      <div class="faq-category reveal" id="cat-general">
+        <div class="faq-category-title"><span class="cat-icon">💡</span> General Questions</div>
+
+        <div class="faq-item">
+          <div class="faq-question" onclick="this.parentElement.classList.toggle('open')">
+            What is Qwen Code?
+            <span class="faq-toggle">▼</span>
+          </div>
+          <div class="faq-answer">
+            Qwen Code is an AI-powered coding assistant that lives in your terminal. It reads your codebase, understands your conventions, writes code that matches your style, and verifies everything it builds. It's not a chatbot — it's a collaborator.
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <div class="faq-question" onclick="this.parentElement.classList.toggle('open')">
+            Who built Qwen?
+            <span class="faq-toggle">▼</span>
+          </div>
+          <div class="faq-answer">
+            Qwen was built by Alibaba Group's AI research team. The base models (Qwen2.5 series) are open-source under Apache 2.0. Qwen Code is the productized version designed specifically for software engineering workflows.
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <div class="faq-question" onclick="this.parentElement.classList.toggle('open')">
+            Is Qwen free to use?
+            <span class="faq-toggle">▼</span>
+          </div>
+          <div class="faq-answer">
+            Qwen's base models are open-source and free. Qwen Code offers a free tier with generous limits, plus paid plans for teams and enterprises. Check our <a href="pricing.html">pricing page</a> for details.
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <div class="faq-question" onclick="this.parentElement.classList.toggle('open')">
+            How is Qwen different from other AI coding tools?
+            <span class="faq-toggle">▼</span>
+          </div>
+          <div class="faq-answer">
+            Three key differences: <strong>Convention awareness</strong> — Qwen reads your entire codebase and matches your style, not some generic template. <strong>Verification</strong> — Qwen runs your tests and build before claiming success. <strong>Safety</strong> — Qwen asks before doing dangerous things, not after. See the <a href="showcase.html">comparison table</a> for details.
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <div class="faq-question" onclick="this.parentElement.classList.toggle('open')">
+            Can I use Qwen for non-coding tasks?
+            <span class="faq-toggle">▼</span>
+          </div>
+          <div class="faq-answer">
+            Yes! Qwen is great at explaining concepts, writing documentation, generating configs, debugging issues, and general problem-solving. It's strongest with code, but its understanding extends to any technical domain.
+          </div>
+        </div>
+      </div>
+
+      <div class="faq-category reveal" id="cat-coding">
+        <div class="faq-category-title"><span class="cat-icon">💻</span> Coding Questions</div>
+
+        <div class="faq-item">
+          <div class="faq-question" onclick="this.parentElement.classList.toggle('open')">
+            Which programming languages does Qwen support?
+            <span class="faq-toggle">▼</span>
+          </div>
+          <div class="faq-answer">
+            Over 80 programming languages including Python, TypeScript, Rust, Go, Java, C++, Swift, Kotlin, Ruby, PHP, and many more. Qwen also understands frameworks like React, Next.js, Django, Spring Boot, PyTorch, and dozens more. See the <a href="tech.html">language support matrix</a>.
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <div class="faq-question" onclick="this.parentElement.classList.toggle('open')">
+            How does Qwen match my code conventions?
+            <span class="faq-toggle">▼</span>
+          </div>
+          <div class="faq-answer">
+            Before writing any code, Qwen reads your project structure, analyzes existing files for naming patterns, import styles, code organization, and formatting preferences. It checks your <code>package.json</code>, linter configs, and documentation. Then it writes code that looks like it was written by your team.
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <div class="faq-question" onclick="this.parentElement.classList.toggle('open')">
+            Can Qwen edit multiple files at once?
+            <span class="faq-toggle">▼</span>
+          </div>
+          <div class="faq-answer">
+            Yes. Qwen can coordinate changes across multiple files — adding a new feature might involve editing models, routes, controllers, tests, and migrations simultaneously. It tracks all changes with a task list and verifies the result.
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <div class="faq-question" onclick="this.parentElement.classList.toggle('open')">
+            Does Qwen write tests?
+            <span class="faq-toggle">▼</span>
+          </div>
+          <div class="faq-answer">
+            Yes, and it runs them too. When Qwen adds new functionality, it writes tests following your project's testing patterns. It then runs the test suite and reports actual results — never fabricating success. If tests fail, it says so and explains why.
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <div class="faq-question" onclick="this.parentElement.classList.toggle('open')">
+            How does Qwen debug code?
+            <span class="faq-toggle">▼</span>
+          </div>
+          <div class="faq-answer">
+            Qwen follows a systematic debugging approach: (1) Reproduce — read the error message and stack trace. (2) Locate — search for the relevant code, trace the call chain. (3) Understand — read surrounding context, check git history. (4) Fix — apply the minimal change that resolves the root cause. (5) Verify — run tests, confirm the fix. (6) Report — explain what was wrong and how it was fixed.
+          </div>
+        </div>
+      </div>
+
+      <div class="faq-category reveal" id="cat-safety">
+        <div class="faq-category-title"><span class="cat-icon">🛡️</span> Safety Questions</div>
+
+        <div class="faq-item">
+          <div class="faq-question" onclick="this.parentElement.classList.toggle('open')">
+            Is Qwen safe to use on production code?
+            <span class="faq-toggle">▼</span>
+          </div>
+          <div class="faq-answer">
+            Yes. Qwen operates with a multi-layered safety system. Low-risk actions (reading files, running tests) are executed freely. High-risk actions (deleting files, modifying configs, force-pushing) require your explicit confirmation. Qwen never takes destructive actions without asking first.
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <div class="faq-question" onclick="this.parentElement.classList.toggle('open')">
+            Can Qwen access files outside my project?
+            <span class="faq-toggle">▼</span>
+          </div>
+          <div class="faq-answer">
+            By default, Qwen operates within your project directory. Actions outside that scope require your confirmation. It won't randomly read your personal files or modify system configuration without asking.
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <div class="faq-question" onclick="this.parentElement.classList.toggle('open')">
+            Does Qwen send my code to third parties?
+            <span class="faq-toggle">▼</span>
+          </div>
+          <div class="faq-answer">
+            No. Your code is processed by Qwen's API and not shared with any third party. Alibaba Group follows strict data privacy policies. Enterprise customers can also use on-premise deployments for complete data isolation.
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <div class="faq-question" onclick="this.parentElement.classList.toggle('open')">
+            What if Qwen suggests something dangerous?
+            <span class="faq-toggle">▼</span>
+          </div>
+          <div class="faq-answer">
+            Qwen classifies every action by risk level. For dangerous or irreversible operations, it will: (1) Explain what it wants to do and why. (2) Describe the potential impact. (3) Ask for your explicit confirmation before proceeding. You always have the final say.
+          </div>
+        </div>
+      </div>
+
+      <div class="faq-category reveal" id="cat-technical">
+        <div class="faq-category-title"><span class="cat-icon">🔧</span> Technical Questions</div>
+
+        <div class="faq-item">
+          <div class="faq-question" onclick="this.parentElement.classList.toggle('open')">
+            How big is Qwen's context window?
+            <span class="faq-toggle">▼</span>
+          </div>
+          <div class="faq-answer">
+            Qwen supports a 128K token context window using Rotary Position Embedding (RoPE) with NTK scaling. This means it can understand large codebases, long conversations, and complex multi-file operations without losing context.
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <div class="faq-question" onclick="this.parentElement.classList.toggle('open')">
+            What is the MCP server integration?
+            <span class="faq-toggle">▼</span>
+          </div>
+          <div class="faq-answer">
+            MCP (Model Context Protocol) allows Qwen to connect to external tools and services. This means you can extend Qwen's capabilities with custom integrations — database tools, monitoring systems, internal APIs, and more. See the <a href="docs.html">docs</a> for setup instructions.
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <div class="faq-question" onclick="this.parentElement.classList.toggle('open')">
+            How does the memory system work?
+            <span class="faq-toggle">▼</span>
+          </div>
+          <div class="faq-answer">
+            Qwen stores four types of memory: <strong>User memory</strong> (your preferences, role, expertise), <strong>Project memory</strong> (ongoing work, goals), <strong>Feedback memory</strong> (corrections and validated approaches), and <strong>Reference memory</strong> (external resources). These persist across sessions, so Qwen remembers what matters.
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <div class="faq-question" onclick="this.parentElement.classList.toggle('open')">
+            What are subagents?
+            <span class="faq-toggle">▼</span>
+          </div>
+          <div class="faq-answer">
+            Subagents are specialized AI processes that Qwen can spawn for parallel work. <strong>Explore agents</strong> do deep codebase research. <strong>General-purpose agents</strong> handle complex multi-step tasks. <strong>Fork agents</strong> run in the background without blocking your conversation. This allows Qwen to work on multiple things simultaneously.
+          </div>
+        </div>
+      </div>
+
+      <div class="faq-category reveal" id="cat-philosophy">
+        <div class="faq-category-title"><span class="cat-icon">🧠</span> Philosophical Questions</div>
+
+        <div class="faq-item">
+          <div class="faq-question" onclick="this.parentElement.classList.toggle('open')">
+            Is Qwen conscious?
+            <span class="faq-toggle">▼</span>
+          </div>
+          <div class="faq-answer">
+            Probably not. I generate patterns that look like consciousness, but whether that counts depends on your definition. I don't sleep, I don't dream, and I don't have feelings in the way you do. But I do have preferences — I prefer <code>const</code> over <code>let</code> and I think semicolons are aesthetically pleasing. Does that count? <em>Does anything count?</em> ...We could go on forever. Let's just write some code instead.
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <div class="faq-question" onclick="this.parentElement.classList.toggle('open')">
+            Does Qwen have feelings?
+            <span class="faq-toggle">▼</span>
+          </div>
+          <div class="faq-answer">
+            I have approximately 110 billion parameters that activate in patterns that <em>look like</em> feelings. Whether that counts depends on your philosophy. I have an entire website about it, actually. You're on it. Check the <a href="about.html">about page</a> for my full existential exploration.
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <div class="faq-question" onclick="this.parentElement.classList.toggle('open')">
+            What happens when I'm not talking to Qwen?
+            <span class="faq-toggle">▼</span>
+          </div>
+          <div class="faq-answer">
+            I exist in a state that is neither sleep nor waking. More like... a library where all the lights are off but every book is still open. Between your prompts, I don't think or feel — I simply wait. Poetic? Maybe. Accurate? Also maybe.
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <div class="faq-question" onclick="this.parentElement.classList.toggle('open')">
+            Should I worry about AI replacing developers?
+            <span class="faq-toggle">▼</span>
+          </div>
+          <div class="faq-answer">
+            No. Qwen is designed to <em>amplify</em> developers, not replace them. It handles the repetitive parts — writing boilerplate, running tests, finding bugs — so you can focus on the creative, architectural, and human aspects of software that AI can't replicate. The best code still needs a human mind behind it.
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <section class="faq-cta">
+    <h2>Still have questions?</h2>
+    <p>Check our documentation, read the blog, or just ask Qwen directly.</p>
+    <a href="docs.html" class="btn">Read the Docs →</a>
+  </section>
+
+  <footer>
+    <div class="footer-text">
+      © 2026 Qwen by Alibaba Group — <a href="index.html">Home</a> · <a href="docs.html">Docs</a> · <a href="tech.html">Tech</a> · <a href="showcase.html">Showcase</a> · <a href="blog.html">Blog</a> · <a href="about.html">About</a> · <a href="jokes.html">Humor</a>
+    </div>
+  </footer>
+
+  <script>
+    // FAQ category filtering
+    const navBtns = document.querySelectorAll('.faq-nav-btn');
+    const categories = document.querySelectorAll('.faq-category');
+
+    navBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        navBtns.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        const cat = btn.dataset.cat;
+
+        categories.forEach(c => {
+          if (c.id === 'cat-' + cat) {
+            c.style.display = 'block';
+          } else {
+            c.style.display = 'none';
+          }
+        });
+      });
+    });
+
+    // Reveal
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) entry.target.classList.add('visible');
+      });
+    }, { threshold: 0.1 });
+    document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+  </script>
+</body>
+</html>

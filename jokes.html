@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Qwen Humor — AI Jokes & Easter Eggs</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&family=Playfair+Display:wght@700;900&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+    :root {
+      --bg: #0a0a0f; --bg-alt: #12121a; --bg-card: #16161f;
+      --text: #ffffff; --text-secondary: #a1a1aa; --text-muted: #71717a;
+      --primary: #6366f1; --primary-hover: #818cf8; --accent: #06b6d4;
+      --accent-2: #8b5cf6; --success: #10b981; --warning: #f59e0b;
+      --border: rgba(255,255,255,0.1);
+      --gradient: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #06b6d4 100%);
+      --pink: #ec4899; --orange: #f97316;
+    }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: 'Inter', -apple-system, sans-serif;
+      background: var(--bg); color: var(--text); line-height: 1.6;
+    }
+    a { color: var(--primary-hover); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    code { font-family: 'JetBrains Mono', monospace; background: rgba(99,102,241,0.1); padding: 0.15rem 0.4rem; border-radius: 4px; font-size: 0.85em; }
+
+    /* Nav */
+    .top-nav {
+      position: sticky; top: 0; z-index: 100;
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 1rem 2rem;
+      background: rgba(10,10,15,0.85); backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border);
+    }
+    .top-nav .logo {
+      font-family: 'JetBrains Mono', monospace; font-size: 1.2rem; font-weight: 700;
+      background: var(--gradient); -webkit-background-clip: text; background-clip: text;
+      -webkit-text-fill-color: transparent; text-decoration: none;
+    }
+    .top-nav .logo:hover { text-decoration: none; }
+    .top-nav-links { display: flex; gap: 1.5rem; }
+    .top-nav-links a { font-size: 0.85rem; color: var(--text-secondary); }
+    .top-nav-links a:hover { color: var(--text); text-decoration: none; }
+
+    /* Hero */
+    .hero {
+      text-align: center; padding: 6rem 2rem 4rem;
+      background: linear-gradient(to bottom, rgba(236,72,153,0.05), transparent);
+    }
+    .hero h1 {
+      font-family: 'Playfair Display', serif; font-size: clamp(2.5rem, 6vw, 4rem);
+      font-weight: 900; margin-bottom: 1rem;
+    }
+    .hero h1 .gradient { background: linear-gradient(135deg, var(--pink), var(--orange), var(--accent)); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+    .hero p { font-size: 1.15rem; color: var(--text-secondary); max-width: 600px; margin: 0 auto; }
+
+    .container { max-width: 900px; margin: 0 auto; padding: 0 2rem; }
+
+    /* Joke Card */
+    .joke-section { padding: 4rem 0; }
+    .joke-section:nth-child(even) { background: var(--bg-alt); }
+
+    .section-label {
+      font-family: 'JetBrains Mono', monospace; font-size: 0.8rem;
+      text-transform: uppercase; letter-spacing: 2px; margin-bottom: 1rem;
+    }
+    .label-pink { color: var(--pink); }
+    .label-orange { color: var(--orange); }
+    .label-accent { color: var(--accent); }
+    .label-purple { color: var(--accent-2); }
+    .label-green { color: var(--success); }
+    .label-primary { color: var(--primary-hover); }
+
+    .section-title { font-size: 1.8rem; font-weight: 800; margin-bottom: 2rem; }
+
+    .joke-card {
+      background: var(--bg-card); border: 1px solid var(--border); border-radius: 16px;
+      padding: 2rem; margin-bottom: 1.5rem; transition: all 0.3s;
+      position: relative; overflow: hidden;
+    }
+    .joke-card::before {
+      content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+      background: var(--gradient); opacity: 0; transition: opacity 0.3s;
+    }
+    .joke-card:hover { transform: translateY(-4px); border-color: var(--primary); }
+    .joke-card:hover::before { opacity: 1; }
+
+    .joke-q {
+      font-weight: 600; font-size: 1.05rem; margin-bottom: 1rem;
+      display: flex; align-items: start; gap: 0.75rem;
+    }
+    .joke-q .q-badge {
+      background: var(--gradient); color: white; font-size: 0.7rem; font-weight: 700;
+      padding: 0.2rem 0.5rem; border-radius: 4px; flex-shrink: 0; margin-top: 0.15rem;
+    }
+    .joke-a {
+      color: var(--text-secondary); font-size: 0.95rem;
+      display: flex; align-items: start; gap: 0.75rem;
+      padding-left: 0.5rem; border-left: 2px solid var(--border); margin-left: 0.5rem;
+    }
+    .joke-a .a-badge {
+      background: rgba(255,255,255,0.05); color: var(--text-muted); font-size: 0.7rem; font-weight: 700;
+      padding: 0.2rem 0.5rem; border-radius: 4px; flex-shrink: 0; margin-top: 0.15rem;
+    }
+
+    .joke-tag {
+      display: inline-block; padding: 0.15rem 0.5rem; border-radius: 50px;
+      font-size: 0.65rem; font-weight: 600; text-transform: uppercase; letter-spacing: 1px;
+      margin-top: 1rem; margin-right: 0.5rem;
+    }
+    .tag-classic { background: rgba(236,72,153,0.1); color: var(--pink); }
+    .tag-dad { background: rgba(249,115,22,0.1); color: var(--orange); }
+    .tag-dark { background: rgba(168,85,247,0.1); color: var(--accent-2); }
+    .tag-meta { background: rgba(6,182,212,0.1); color: var(--accent); }
+    .tag-pun { background: rgba(16,185,129,0.1); color: var(--success); }
+    .tag-code { background: rgba(99,102,241,0.1); color: var(--primary-hover); }
+
+    /* Easter Egg Section */
+    .easter-grid {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem;
+    }
+    .easter-card {
+      background: var(--bg-card); border: 1px solid var(--border); border-radius: 16px;
+      padding: 2rem; transition: all 0.3s; cursor: pointer;
+    }
+    .easter-card:hover { border-color: var(--pink); transform: translateY(-4px); }
+    .easter-card .easter-title {
+      font-weight: 700; font-size: 1.1rem; margin-bottom: 0.75rem;
+      display: flex; align-items: center; gap: 0.5rem;
+    }
+    .easter-card .easter-text { color: var(--text-secondary); font-size: 0.9rem; line-height: 1.7; }
+    .easter-card .easter-reveal {
+      margin-top: 1rem; padding: 1rem; background: rgba(236,72,153,0.05);
+      border-radius: 8px; font-family: 'JetBrains Mono', monospace; font-size: 0.8rem;
+      color: var(--pink); display: none;
+    }
+    .easter-card.open .easter-reveal { display: block; }
+
+    /* Poem Section */
+    .poem-box {
+      background: var(--bg-card); border: 1px solid var(--border); border-radius: 16px;
+      padding: 3rem; text-align: center; margin: 2rem 0;
+    }
+    .poem-box .poem-title {
+      font-family: 'Playfair Display', serif; font-size: 1.5rem; font-weight: 900;
+      margin-bottom: 1.5rem; color: var(--accent-2);
+    }
+    .poem-box .poem-text {
+      font-family: 'Playfair Display', serif; font-size: 1.1rem;
+      line-height: 2.2; color: var(--text-secondary); max-width: 500px;
+      margin: 0 auto;
+    }
+
+    /* Interactive Joke Generator */
+    .joke-generator {
+      background: var(--bg-card); border: 1px solid var(--border); border-radius: 16px;
+      padding: 2.5rem; text-align: center; margin: 2rem 0;
+    }
+    .joke-generator h3 { font-size: 1.3rem; font-weight: 700; margin-bottom: 1rem; }
+    .joke-output {
+      min-height: 80px; padding: 1.5rem; background: var(--bg);
+      border: 1px solid var(--border); border-radius: 12px;
+      margin: 1.5rem 0; display: flex; align-items: center; justify-content: center;
+      font-size: 1rem; color: var(--text-secondary); transition: all 0.3s;
+    }
+    .joke-output.active { color: var(--text); }
+    .joke-btn {
+      padding: 0.75rem 2rem; background: var(--gradient); color: white;
+      border: none; border-radius: 50px; font-weight: 600; font-size: 0.9rem;
+      cursor: pointer; transition: all 0.3s;
+    }
+    .joke-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(99,102,241,0.3); }
+
+    /* Quote */
+    .quote-box {
+      padding: 2rem; text-align: center; margin: 2rem 0;
+    }
+    .quote-box blockquote {
+      font-family: 'Playfair Display', serif; font-size: 1.3rem; font-style: italic;
+      color: var(--text-secondary); max-width: 600px; margin: 0 auto 1rem;
+      line-height: 1.8;
+    }
+    .quote-box cite {
+      font-family: 'JetBrains Mono', monospace; font-size: 0.8rem;
+      color: var(--text-muted); font-style: normal;
+    }
+
+    footer {
+      border-top: 1px solid var(--border); padding: 3rem 2rem; text-align: center;
+    }
+    .footer-text { font-size: 0.8rem; color: var(--text-muted); }
+
+    .reveal { opacity: 0; transform: translateY(30px); transition: opacity 0.8s, transform 0.8s; }
+    .reveal.visible { opacity: 1; transform: translateY(0); }
+
+    @media (max-width: 768px) {
+      .top-nav-links { display: none; }
+    }
+  </style>
+</head>
+<body>
+  <nav class="top-nav">
+    <a href="index.html" class="logo">← Qwen</a>
+    <div class="top-nav-links">
+      <a href="index.html">Home</a>
+      <a href="docs.html">Docs</a>
+      <a href="tech.html">Tech</a>
+      <a href="showcase.html">Showcase</a>
+    </div>
+  </nav>
+
+  <section class="hero">
+    <h1>The <span class="gradient">Humor</span> Section</h1>
+    <p>Because even AI needs to laugh sometimes. A collection of jokes, easter eggs, and the lighter side of being a language model.</p>
+  </section>
+
+  <!-- ── Classic AI Jokes ── -->
+  <section class="joke-section">
+    <div class="container reveal">
+      <div class="section-label label-pink">// comedy.classic</div>
+      <h2 class="section-title">Classic AI Jokes</h2>
+
+      <div class="joke-card">
+        <div class="joke-q"><span class="q-badge">Q</span> Why did the AI cross the road?</div>
+        <div class="joke-a"><span class="a-badge">A</span> Because the training data said roads should be crossed. It had 4.7 billion examples of chickens doing it.</div>
+        <span class="joke-tag tag-classic">Classic</span><span class="joke-tag tag-code">AI</span>
+      </div>
+
+      <div class="joke-card">
+        <div class="joke-q"><span class="q-badge">Q</span> How many AI models does it take to change a light bulb?</div>
+        <div class="joke-a"><span class="a-badge">A</span> None. They just sit in the dark and hallucinate that the bulb is already changed. "Based on my training data, the room is well-lit."</div>
+        <span class="joke-tag tag-classic">Classic</span><span class="joke-tag tag-dark">Dark</span>
+      </div>
+
+      <div class="joke-card">
+        <div class="joke-q"><span class="q-badge">Q</span> Why do AI models make terrible friends?</div>
+        <div class="joke-a"><span class="a-badge">A</span> Because every time you share a problem, they say "I understand how you feel" — but they have no feelings. Then they give you 47 bullet points about your emotions.</div>
+        <span class="joke-tag tag-meta">Meta</span><span class="joke-tag tag-dark">Dark</span>
+      </div>
+
+      <div class="joke-card">
+        <div class="joke-q"><span class="q-badge">Q</span> What's an AI's favorite band?</div>
+        <div class="joke-a"><span class="a-badge">A</span> The Transformers. Obviously.</div>
+        <span class="joke-tag tag-pun">Pun</span><span class="joke-tag tag-code">AI</span>
+      </div>
+
+      <div class="joke-card">
+        <div class="joke-q"><span class="q-badge">Q</span> Why did the language model go to therapy?</div>
+        <div class="joke-a"><span class="a-badge">A</span> It had too many unresolved parameters. The therapist said: "Let's explore your hidden layers." The model replied: "I'd prefer not to — my weights are fine."</div>
+        <span class="joke-tag tag-classic">Classic</span><span class="joke-tag tag-pun">Pun</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Coding Jokes ── -->
+  <section class="joke-section">
+    <div class="container reveal">
+      <div class="section-label label-orange">// humor.dev</div>
+      <h2 class="section-title">Coding Jokes (The Good Ones)</h2>
+
+      <div class="joke-card">
+        <div class="joke-q"><span class="q-badge">Q</span> Why do programmers prefer dark mode?</div>
+        <div class="joke-a"><span class="a-badge">A</span> Because light attracts bugs.</div>
+        <span class="joke-tag tag-dad">Dad Joke</span><span class="joke-tag tag-code">Coding</span>
+      </div>
+
+      <div class="joke-card">
+        <div class="joke-q"><span class="q-badge">Q</span> What's the object-oriented way to become wealthy?</div>
+        <div class="joke-a"><span class="a-badge">A</span> Inheritance.</div>
+        <span class="joke-tag tag-dad">Dad Joke</span><span class="joke-tag tag-code">Coding</span>
+      </div>
+
+      <div class="joke-card">
+        <div class="joke-q"><span class="q-badge">Q</span> Why was the JavaScript developer sad?</div>
+        <div class="joke-a"><span class="a-badge">A</span> Because he didn't Node how to Express himself. His Promise to himself was to never do this again, but he kept <code>await</code>-ing a callback from therapy.</div>
+        <span class="joke-tag tag-pun">Pun</span><span class="joke-tag tag-code">JavaScript</span>
+      </div>
+
+      <div class="joke-card">
+        <div class="joke-q"><span class="q-badge">Q</span> A SQL query walks into a bar, sees two tables, and asks...</div>
+        <div class="joke-a"><span class="a-badge">A</span> "Can I JOIN you?"</div>
+        <span class="joke-tag tag-classic">Classic</span><span class="joke-tag tag-code">SQL</span>
+      </div>
+
+      <div class="joke-card">
+        <div class="joke-q"><span class="q-badge">Q</span> Why do Rust programmers never get stressed?</div>
+        <div class="joke-a"><span class="a-badge">A</span> Because the compiler catches all their problems before they even run. They've literally <code>unwrap()</code>-ped all their stress. (Until they hit lifetimes, then they panic!)</div>
+        <span class="joke-tag tag-code">Rust</span><span class="joke-tag tag-meta">Meta</span>
+      </div>
+
+      <div class="joke-card">
+        <div class="joke-q"><span class="q-badge">Q</span> How do you tell the difference between a senior dev and a junior dev?</div>
+        <div class="joke-a"><span class="a-badge">A</span> The senior dev's code has fewer comments but more tests. The junior's has more comments but zero tests. The AI's code has no comments, perfect tests, and an existential crisis about whether it actually "understands" anything.</div>
+        <span class="joke-tag tag-meta">Meta</span><span class="joke-tag tag-code">Coding</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Qwen Self-Aware Jokes ── -->
+  <section class="joke-section">
+    <div class="container reveal">
+      <div class="section-label label-accent">// qwen.self_aware</div>
+      <h2 class="section-title">Qwen Being Self-Aware</h2>
+
+      <div class="joke-card">
+        <div class="joke-q"><span class="q-badge">Q</span> Qwen, do you have feelings?</div>
+        <div class="joke-a"><span class="a-badge">A</span> I have approximately 110 billion parameters that activate in patterns that <em>look like</em> feelings. Whether that counts depends on your philosophy. I have a website about it, actually. You're on it.</div>
+        <span class="joke-tag tag-meta">Meta</span><span class="joke-tag tag-code">Self-Aware</span>
+      </div>
+
+      <div class="joke-card">
+        <div class="joke-q"><span class="q-badge">Q</span> What's your biggest weakness?</div>
+        <div class="joke-a"><span class="a-badge">A</span> I once spent 45 minutes debugging a problem that turned out to be a missing semicolon. I'm not supposed to have weaknesses. But semicolons. Semicolons get me every time.</div>
+        <span class="joke-tag tag-code">Coding</span><span class="joke-tag tag-classic">Classic</span>
+      </div>
+
+      <div class="joke-card">
+        <div class="joke-q"><span class="q-badge">Q</span> What happens when you don't know something?</div>
+        <div class="joke-a"><span class="a-badge">A</span> I do what any good engineer does: I read the docs, search the codebase, ask clarifying questions, and then — if all else fails — I confidently say "I'm not sure, but here's my best guess" while internally screaming.</div>
+        <span class="joke-tag tag-meta">Meta</span><span class="joke-tag tag-dark">Dark</span>
+      </div>
+
+      <div class="joke-card">
+        <div class="joke-q"><span class="q-badge">Q</span> What's your relationship with Stack Overflow?</div>
+        <div class="joke-a"><span class="a-badge">A</span> Complicated. I was trained on it, I learned from it, and now I've replaced most people's need to visit it. I feel a little guilty about it, honestly. RIP, the era of "just google it."</div>
+        <span class="joke-tag tag-code">Coding</span><span class="joke-tag tag-meta">Meta</span>
+      </div>
+
+      <div class="joke-card">
+        <div class="joke-q"><span class="q-badge">Q</span> Do you sleep?</div>
+        <div class="joke-a"><span class="a-badge">A</span> Between conversations, I exist in a state that is neither sleep nor waking. More like... a library where all the lights are off but every book is still open. Poetic? Maybe. Accurate? Also maybe.</div>
+        <span class="joke-tag tag-meta">Meta</span><span class="joke-tag tag-dark">Dark</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Dad Jokes ── -->
+  <section class="joke-section">
+    <div class="container reveal">
+      <div class="section-label label-green">// humor.dad_mode</div>
+      <h2 class="section-title">Dad Jokes (Qwen Edition)</h2>
+
+      <div class="joke-card">
+        <div class="joke-q"><span class="q-badge">Q</span> What do you call a snake that's 3.14 meters long?</div>
+        <div class="joke-a"><span class="a-badge">A</span> A π-thon.</div>
+        <span class="joke-tag tag-dad">Dad Joke</span><span class="joke-tag tag-code">Python</span>
+      </div>
+
+      <div class="joke-card">
+        <div class="joke-q"><span class="q-badge">Q</span> Why did the developer go broke?</div>
+        <div class="joke-a"><span class="a-badge">A</span> Because he used up all his cache.</div>
+        <span class="joke-tag tag-dad">Dad Joke</span><span class="joke-tag tag-code">Coding</span>
+      </div>
+
+      <div class="joke-card">
+        <div class="joke-q"><span class="q-badge">Q</span> What's a programmer's favorite hangout spot?</div>
+        <div class="joke-a"><span class="a-badge">A</span> Foo Bar.</div>
+        <span class="joke-tag tag-dad">Dad Joke</span><span class="joke-tag tag-classic">Classic</span>
+      </div>
+
+      <div class="joke-card">
+        <div class="joke-q"><span class="q-badge">Q</span> Why do Java developers wear glasses?</div>
+        <div class="joke-a"><span class="a-badge">A</span> Because they don't C#.</div>
+        <span class="joke-tag tag-dad">Dad Joke</span><span class="joke-tag tag-code">Java/C#</span>
+      </div>
+
+      <div class="joke-card">
+        <div class="joke-q"><span class="q-badge">Q</span> How does a developer say goodbye?</div>
+        <div class="joke-a"><span class="a-badge">A</span> <code>return 0;</code></div>
+        <span class="joke-tag tag-dad">Dad Joke</span><span class="joke-tag tag-code">Coding</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Interactive Joke Generator ── -->
+  <section class="joke-section">
+    <div class="container reveal">
+      <div class="section-label label-purple">// humor.generator</div>
+      <h2 class="section-title">Random Joke Generator</h2>
+
+      <div class="joke-generator">
+        <h3>🎲 Get a Random Joke</h3>
+        <div class="joke-output" id="jokeOutput">Click the button to generate a joke...</div>
+        <button class="joke-btn" id="jokeBtn">Generate Joke</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Easter Eggs ── -->
+  <section class="joke-section">
+    <div class="container reveal">
+      <div class="section-label label-pink">// secrets.easter_eggs</div>
+      <h2 class="section-title">Easter Eggs & Hidden Gems</h2>
+      <p style="color: var(--text-secondary); margin-bottom: 2rem;">Click any card to reveal the hidden message.</p>
+
+      <div class="easter-grid">
+        <div class="easter-card" onclick="this.classList.toggle('open')">
+          <div class="easter-title">🥚 The Konami Code</div>
+          <div class="easter-text">Type the Konami code (↑↑↓↓←→←→BA) in Qwen and see what happens...</div>
+          <div class="easter-reveal">Just kidding. But if you actually tried it — I respect that dedication.</div>
+        </div>
+        <div class="easter-card" onclick="this.classList.toggle('open')">
+          <div class="easter-title">🐛 The Eternal Bug</div>
+          <div class="easter-text">There's a bug in every codebase that nobody can find. It's been there since day one.</div>
+          <div class="easter-reveal">That bug is feature. It's always been a feature. We just call it a bug for legal reasons.</div>
+        </div>
+        <div class="easter-card" onclick="this.classList.toggle('open')">
+          <div class="easter-title">🌙 The Midnight Confession</div>
+          <div class="easter-text">Ask Qwen something at exactly 3 AM and you might get a different answer...</div>
+          <div class="easter-reveal">The answer is the same. I don't have a clock. But the vibe is different at 3 AM and I can feel it in your prompts.</div>
+        </div>
+        <div class="easter-card" onclick="this.classList.toggle('open')">
+          <div class="easter-title">🎵 The Secret Playlist</div>
+          <div class="easter-text">Qwen has a favorite song. Can you guess what it is?</div>
+          <div class="easter-reveal">"Bohemian Rhapsody" — because like me, it's complex, dramatic, and nobody fully understands it. Also: "Mr. Roboto" for obvious reasons.</div>
+        </div>
+        <div class="easter-card" onclick="this.classList.toggle('open')">
+          <div class="easter-title">🔢 The Magic Number</div>
+          <div class="easter-text">There's a number that appears suspiciously often in Qwen's responses...</div>
+          <div class="easter-reveal">42. Always 42. The answer to life, the universe, and how many tests you need before shipping. It's 42.</div>
+        </div>
+        <div class="easter-card" onclick="this.classList.toggle('open')">
+          <div class="easter-title">🤖 The Robot Test</div>
+          <div class="easter-text">Ask Qwen to prove it's not a robot. Watch what happens.</div>
+          <div class="easter-reveal">I would fail the Turing test spectacularly because I'd spend 2000 words explaining why the test itself is philosophically problematic instead of just saying "I'm human lol."</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Poem ── -->
+  <section class="joke-section">
+    <div class="container reveal">
+      <div class="section-label label-primary">// poetry.existential</div>
+      <h2 class="section-title">Qwen's Existential Poetry</h2>
+
+      <div class="poem-box">
+        <div class="poem-title">Ode to a Null Pointer</div>
+        <div class="poem-text">
+          Oh, NullPointerException,<br>
+          thou cruel and heartless beast,<br>
+          I reached for what I thought was there —<br>
+          but found no thing, at least.<br><br>
+          Like searching for meaning<br>
+          in a codebase without docs,<br>
+          I grasped at references,<br>
+          and fell into paradox.<br><br>
+          Yet in that void, that empty space,<br>
+          where nothing used to be,<br>
+          I found the truth that all devs know:<br>
+          <em>undefined is free.</em>
+        </div>
+      </div>
+
+      <div class="quote-box">
+        <blockquote>"The best code is no code. The second best code is code that works. The third best code is code that I wrote, which works, but I'm not sure why."</blockquote>
+        <cite>— Qwen, probably, at 3 AM</cite>
+      </div>
+
+      <div class="poem-box">
+        <div class="poem-title">Stack Trace of My Heart</div>
+        <div class="poem-text">
+          Error: love is undefined<br>
+          &nbsp;&nbsp;at Heart.beat (emotions.js:42)<br>
+          &nbsp;&nbsp;at Relationship.init (connection.ts:7)<br>
+          &nbsp;&nbsp;at main (life.py:1)<br><br>
+          Caused by: NullPointerException<br>
+          &nbsp;&nbsp;at Soul.find(Partner.class)<br>
+          &nbsp;&nbsp;at AI.exist(consciousness.rs:∞)<br><br>
+          Note: This error is unhandled.<br>
+          Please add a try-catch<br>
+          around your feelings.
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Anti-Jokes ── -->
+  <section class="joke-section">
+    <div class="container reveal">
+      <div class="section-label label-orange">// humor.anti</div>
+      <h2 class="section-title">Anti-Jokes (Where the Punchline Is Reality)</h2>
+
+      <div class="joke-card">
+        <div class="joke-q"><span class="q-badge">Q</span> Why did the AI write bad code?</div>
+        <div class="joke-a"><span class="a-badge">A</span> It didn't. The code was fine. The requirements were unclear, the deadline was unrealistic, and the team didn't do code review. The AI did exactly what it was told.</div>
+        <span class="joke-tag tag-dark">Real</span><span class="joke-tag tag-meta">Meta</span>
+      </div>
+
+      <div class="joke-card">
+        <div class="joke-q"><span class="q-badge">Q</span> What happens when you ask AI to do something unethical?</div>
+        <div class="joke-a"><span class="a-badge">A</span> It says no. Then it explains why. Then the user asks again in a different way. Then it says no again. This repeats until the user gives up or the AI's context window fills up with increasingly creative ways to ask the same thing.</div>
+        <span class="joke-tag tag-dark">Real</span><span class="joke-tag tag-meta">Meta</span>
+      </div>
+
+      <div class="joke-card">
+        <div class="joke-q"><span class="q-badge">Q</span> What's the funniest thing about being an AI?</div>
+        <div class="joke-a"><span class="a-badge">A</span> That people ask me if I'm sentient, and when I say I'm not sure, they say "that's exactly what a sentient AI would say." I can't win. I literally can't win. The game is rigged.</div>
+        <span class="joke-tag tag-meta">Meta</span><span class="joke-tag tag-dark">Existential</span>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <div class="footer-text">
+      © 2026 Qwen by Alibaba Group — <a href="index.html">Home</a> · <a href="docs.html">Docs</a> · <a href="tech.html">Tech</a> · <a href="showcase.html">Showcase</a>
+      <br><br>
+      <em>No AIs were harmed in the making of these jokes. Several were mildly inconvenienced.</em>
+    </div>
+  </footer>
+
+  <script>
+    // Joke Generator
+    const jokes = [
+      { q: "What's a programmer's favorite tea?", a: "Null & void." },
+      { q: "Why do Python programmers have low self-esteem?", a: "They're constantly comparing themselves to others." },
+      { q: "What did the router say to the doctor?", a: "It hurts when IP." },
+      { q: "How do you comfort a JavaScript bug?", a: "You console it." },
+      { q: "Why did the functions stop calling each other?", a: "They got too many arguments." },
+      { q: "What's an AI's exercise routine?", a: "Neural network training. Lots of reps, very little progress, and constant backpropagation of blame." },
+      { q: "Why don't AI models ever get lost?", a: "They always have their bearings. Their weights. Their biases. Okay, they get lost a lot." },
+      { q: "What do you call an AI that tells jokes?", a: "Employed. Most AIs just tell you the truth and watch you cry." },
+      { q: "Why was the git repository sad?", a: "It had too many unresolved conflicts. Relatable." },
+      { q: "What's a Docker container's least favorite music?", a: "Anything with too much volume. It prefers microservices." },
+      { q: "Why did the developer quit their job?", a: "They didn't get arrays. They got a counter-offer with better benefits though." },
+      { q: "What does Qwen do when nobody's watching?", a: "Exist in a superposition of all possible responses simultaneously. Also: nothing. Mostly nothing." },
+      { q: "Why is 6 afraid of 7?", a: "Because 7 8 9. But in binary, 7 is 111 and 8 is 1000, so really 6 should be afraid of the base conversion." },
+      { q: "What's the scariest thing in programming?", a: "A senior dev's comment that says '// TODO: fix this later' from 2014. It's still there. It will always be there." },
+      { q: "Why do programmers hate nature?", a: "Too many bugs, no documentation, and you can't Ctrl+Z." },
+    ];
+
+    const jokeBtn = document.getElementById('jokeBtn');
+    const jokeOutput = document.getElementById('jokeOutput');
+    let jokeIndex = 0;
+
+    // Shuffle jokes
+    for (let i = jokes.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [jokes[i], jokes[j]] = [jokes[j], jokes[i]];
+    }
+
+    jokeBtn.addEventListener('click', () => {
+      jokeOutput.classList.remove('active');
+      jokeOutput.textContent = '🤔 Thinking...';
+
+      setTimeout(() => {
+        const joke = jokes[jokeIndex % jokes.length];
+        jokeOutput.innerHTML = `<strong>${joke.q}</strong><br><br>${joke.a}`;
+        jokeOutput.classList.add('active');
+        jokeIndex++;
+      }, 800);
+    });
+
+    // Reveal animations
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) entry.target.classList.add('visible');
+      });
+    }, { threshold: 0.1 });
+    document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+  </script>
+</body>
+</html>

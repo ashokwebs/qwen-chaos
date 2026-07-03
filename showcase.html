@@ -1,0 +1,650 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Qwen Showcase — What I Can Build</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+    :root {
+      --bg: #0a0a0f; --bg-alt: #12121a; --bg-card: #16161f;
+      --text: #ffffff; --text-secondary: #a1a1aa; --text-muted: #71717a;
+      --primary: #6366f1; --primary-hover: #818cf8; --accent: #06b6d4;
+      --accent-2: #8b5cf6; --success: #10b981; --warning: #f59e0b;
+      --border: rgba(255,255,255,0.1);
+      --gradient: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #06b6d4 100%);
+      --pink: #ec4899; --orange: #f97316; --teal: #14b8a6;
+    }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: 'Inter', -apple-system, sans-serif;
+      background: var(--bg); color: var(--text); line-height: 1.6;
+    }
+    a { color: var(--primary-hover); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    code { font-family: 'JetBrains Mono', monospace; background: rgba(99,102,241,0.1); padding: 0.15rem 0.4rem; border-radius: 4px; font-size: 0.85em; }
+    pre { font-family: 'JetBrains Mono', monospace; background: var(--bg-alt); border: 1px solid var(--border); border-radius: 12px; padding: 1.5rem; overflow-x: auto; margin: 1rem 0; font-size: 0.8rem; }
+
+    /* Nav */
+    .top-nav {
+      position: sticky; top: 0; z-index: 100;
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 1rem 2rem;
+      background: rgba(10,10,15,0.85); backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border);
+    }
+    .top-nav .logo {
+      font-family: 'JetBrains Mono', monospace; font-size: 1.2rem; font-weight: 700;
+      background: var(--gradient); -webkit-background-clip: text; background-clip: text;
+      -webkit-text-fill-color: transparent; text-decoration: none;
+    }
+    .top-nav .logo:hover { text-decoration: none; }
+    .top-nav-links { display: flex; gap: 1.5rem; }
+    .top-nav-links a { font-size: 0.85rem; color: var(--text-secondary); }
+    .top-nav-links a:hover { color: var(--text); text-decoration: none; }
+
+    /* Hero */
+    .showcase-hero {
+      text-align: center; padding: 6rem 2rem 4rem;
+      background: linear-gradient(to bottom, rgba(6,182,212,0.05), transparent);
+    }
+    .showcase-hero h1 {
+      font-size: clamp(2.5rem, 6vw, 4rem); font-weight: 800; margin-bottom: 1rem;
+    }
+    .showcase-hero h1 .gradient {
+      background: var(--gradient); -webkit-background-clip: text; background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .showcase-hero p { font-size: 1.15rem; color: var(--text-secondary); max-width: 600px; margin: 0 auto; }
+
+    .container { max-width: 1200px; margin: 0 auto; padding: 0 2rem; }
+
+    /* Filter Tabs */
+    .filter-tabs {
+      display: flex; gap: 0.75rem; justify-content: center;
+      margin-bottom: 3rem; flex-wrap: wrap;
+    }
+    .filter-tab {
+      padding: 0.5rem 1.25rem; background: rgba(255,255,255,0.05);
+      border: 1px solid var(--border); border-radius: 50px; color: var(--text-secondary);
+      font-size: 0.85rem; font-weight: 500; cursor: pointer; transition: all 0.3s;
+    }
+    .filter-tab:hover, .filter-tab.active {
+      background: var(--primary); border-color: var(--primary); color: white;
+    }
+
+    /* Showcase Grid */
+    .showcase-grid {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 2rem;
+      margin-bottom: 4rem;
+    }
+    .showcase-card {
+      background: var(--bg-card); border: 1px solid var(--border); border-radius: 16px;
+      overflow: hidden; transition: all 0.4s; position: relative;
+    }
+    .showcase-card:hover {
+      transform: translateY(-8px); border-color: var(--primary);
+      box-shadow: 0 20px 60px rgba(99,102,241,0.15);
+    }
+    .showcase-card .card-visual {
+      height: 200px; position: relative; overflow: hidden;
+    }
+    .showcase-card .card-visual::after {
+      content: ''; position: absolute; inset: 0;
+      background: linear-gradient(to bottom, transparent 50%, var(--bg-card));
+    }
+    .showcase-card .card-body { padding: 1.5rem 2rem 2rem; position: relative; z-index: 1; }
+    .showcase-card .card-tags { display: flex; gap: 0.5rem; margin-bottom: 1rem; flex-wrap: wrap; }
+    .showcase-card .card-tag {
+      padding: 0.2rem 0.6rem; border-radius: 50px; font-size: 0.65rem;
+      font-weight: 600; text-transform: uppercase; letter-spacing: 1px;
+    }
+    .showcase-card h3 { font-size: 1.2rem; font-weight: 700; margin-bottom: 0.5rem; }
+    .showcase-card p { color: var(--text-secondary); font-size: 0.9rem; line-height: 1.6; }
+
+    .card-tech {
+      margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid var(--border);
+      display: flex; gap: 0.5rem; flex-wrap: wrap;
+    }
+    .card-tech span {
+      font-family: 'JetBrains Mono', monospace; font-size: 0.7rem; color: var(--text-muted);
+      padding: 0.15rem 0.5rem; background: rgba(255,255,255,0.03); border-radius: 4px;
+    }
+
+    /* Visual backgrounds */
+    .visual-frontend { background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 40%, #ec4899 100%); }
+    .visual-backend { background: linear-gradient(135deg, #06b6d4 0%, #6366f1 50%, #8b5cf6 100%); }
+    .visual-fullstack { background: linear-gradient(135deg, #10b981 0%, #06b6d4 50%, #6366f1 100%); }
+    .visual-devops { background: linear-gradient(135deg, #f97316 0%, #f59e0b 50%, #10b981 100%); }
+    .visual-data { background: linear-gradient(135deg, #8b5cf6 0%, #ec4899 50%, #f97316 100%); }
+    .visual-creative { background: linear-gradient(135deg, #ec4899 0%, #8b5cf6 50%, #06b6d4 100%); }
+
+    .visual-pattern {
+      position: absolute; inset: 0; opacity: 0.2;
+      background-image: url('data:image/svg+xml,<svg width="60" height="60" xmlns="http://www.w3.org/2000/svg"><defs><pattern id="p" width="60" height="60" patternUnits="userSpaceOnUse"><circle cx="30" cy="30" r="2" fill="white"/></pattern></defs><rect width="100%" height="100%" fill="url(%23p)"/></svg>');
+    }
+
+    .visual-icon {
+      position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+      font-size: 3rem; z-index: 1; opacity: 0.8;
+      filter: drop-shadow(0 4px 20px rgba(0,0,0,0.3));
+    }
+
+    /* Workflow Section */
+    .workflow { padding: 5rem 0; background: var(--bg-alt); }
+    .workflow-title { font-size: 1.8rem; font-weight: 800; margin-bottom: 0.75rem; }
+    .workflow-desc { color: var(--text-secondary); margin-bottom: 3rem; max-width: 600px; }
+
+    .workflow-steps {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1.5rem;
+    }
+    .workflow-step {
+      background: var(--bg-card); border: 1px solid var(--border); border-radius: 16px;
+      padding: 2rem; text-align: center; transition: all 0.3s; position: relative;
+    }
+    .workflow-step:hover { border-color: var(--primary); transform: translateY(-4px); }
+    .workflow-step .step-num {
+      font-family: 'JetBrains Mono', monospace; font-size: 2rem; font-weight: 800;
+      background: var(--gradient); -webkit-background-clip: text; background-clip: text;
+      -webkit-text-fill-color: transparent; margin-bottom: 0.5rem;
+    }
+    .workflow-step h4 { font-weight: 700; margin-bottom: 0.5rem; }
+    .workflow-step p { font-size: 0.85rem; color: var(--text-muted); }
+
+    /* Testimonials */
+    .testimonials { padding: 5rem 0; }
+    .testimonials-title { font-size: 1.8rem; font-weight: 800; margin-bottom: 0.75rem; }
+    .testimonials-desc { color: var(--text-secondary); margin-bottom: 3rem; }
+    .testimonial-grid {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem;
+    }
+    .testimonial-card {
+      background: var(--bg-card); border: 1px solid var(--border); border-radius: 16px;
+      padding: 2rem; transition: all 0.3s;
+    }
+    .testimonial-card:hover { border-color: var(--accent); }
+    .testimonial-card .stars { color: var(--warning); font-size: 0.9rem; margin-bottom: 1rem; }
+    .testimonial-card blockquote {
+      font-size: 0.95rem; color: var(--text-secondary); line-height: 1.7;
+      margin-bottom: 1.5rem; font-style: italic;
+    }
+    .testimonial-card .author {
+      display: flex; align-items: center; gap: 0.75rem;
+    }
+    .testimonial-card .avatar {
+      width: 40px; height: 40px; border-radius: 50%;
+      background: var(--gradient); display: flex; align-items: center; justify-content: center;
+      font-weight: 700; font-size: 0.9rem;
+    }
+    .testimonial-card .author-name { font-weight: 600; font-size: 0.9rem; }
+    .testimonial-card .author-role { font-size: 0.75rem; color: var(--text-muted); }
+
+    /* Comparison Table */
+    .comparison { padding: 5rem 0; background: var(--bg-alt); }
+    .comparison-title { font-size: 1.8rem; font-weight: 800; margin-bottom: 3rem; }
+    .comparison-table {
+      width: 100%; border-collapse: collapse;
+      background: var(--bg-card); border-radius: 16px; overflow: hidden;
+      border: 1px solid var(--border);
+    }
+    .comparison-table th, .comparison-table td {
+      padding: 1rem 1.5rem; text-align: left; border-bottom: 1px solid var(--border);
+    }
+    .comparison-table th {
+      background: rgba(99,102,241,0.08); font-size: 0.75rem; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted);
+    }
+    .comparison-table td { font-size: 0.9rem; color: var(--text-secondary); }
+    .comparison-table tr:last-child td { border-bottom: none; }
+    .comparison-table tr:hover td { background: rgba(99,102,241,0.03); }
+    .check { color: var(--success); font-weight: 700; }
+    .cross { color: var(--text-muted); }
+    .partial { color: var(--warning); }
+
+    footer {
+      border-top: 1px solid var(--border); padding: 3rem 2rem; text-align: center;
+    }
+    .footer-text { font-size: 0.8rem; color: var(--text-muted); }
+
+    .reveal { opacity: 0; transform: translateY(30px); transition: opacity 0.8s, transform 0.8s; }
+    .reveal.visible { opacity: 1; transform: translateY(0); }
+
+    @media (max-width: 768px) {
+      .showcase-grid { grid-template-columns: 1fr; }
+      .top-nav-links { display: none; }
+    }
+  </style>
+</head>
+<body>
+  <nav class="top-nav">
+    <a href="index.html" class="logo">← Qwen</a>
+    <div class="top-nav-links">
+      <a href="index.html">Home</a>
+      <a href="docs.html">Docs</a>
+      <a href="tech.html">Tech</a>
+      <a href="jokes.html">Humor</a>
+    </div>
+  </nav>
+
+  <section class="showcase-hero">
+    <h1>The <span class="gradient">Showcase</span></h1>
+    <p>From single files to full-stack applications — here's what Qwen can build, debug, refactor, and ship. Real projects, real code, real results.</p>
+  </section>
+
+  <!-- ── Filter Tabs ── -->
+  <section style="padding: 2rem 0;">
+    <div class="container">
+      <div class="filter-tabs">
+        <div class="filter-tab active" data-filter="all">All Projects</div>
+        <div class="filter-tab" data-filter="frontend">Frontend</div>
+        <div class="filter-tab" data-filter="backend">Backend</div>
+        <div class="filter-tab" data-filter="fullstack">Full Stack</div>
+        <div class="filter-tab" data-filter="devops">DevOps</div>
+        <div class="filter-tab" data-filter="data">Data & ML</div>
+        <div class="filter-tab" data-filter="creative">Creative</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Showcase Grid ── -->
+  <section>
+    <div class="container">
+      <div class="showcase-grid">
+
+        <div class="showcase-card" data-category="frontend">
+          <div class="card-visual visual-frontend">
+            <div class="visual-pattern"></div>
+            <div class="visual-icon">🎨</div>
+          </div>
+          <div class="card-body">
+            <div class="card-tags">
+              <span class="card-tag" style="background:rgba(99,102,241,0.15);color:var(--primary-hover);">Frontend</span>
+              <span class="card-tag" style="background:rgba(16,185,129,0.15);color:var(--success);">UI/UX</span>
+            </div>
+            <h3>Design System Generator</h3>
+            <p>Generate a complete design system with tokens, components, documentation, and theme switching — all from a single prompt describing your brand.</p>
+            <div class="card-tech">
+              <span>React</span><span>TypeScript</span><span>CSS Modules</span><span>Storybook</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="showcase-card" data-category="backend">
+          <div class="card-visual visual-backend">
+            <div class="visual-pattern"></div>
+            <div class="visual-icon">⚙️</div>
+          </div>
+          <div class="card-body">
+            <div class="card-tags">
+              <span class="card-tag" style="background:rgba(6,182,212,0.15);color:var(--accent);">Backend</span>
+              <span class="card-tag" style="background:rgba(245,158,11,0.15);color:var(--warning);">API</span>
+            </div>
+            <h3>REST API with Auth</h3>
+            <p>Full REST API with JWT authentication, role-based access control, rate limiting, input validation, error handling, and comprehensive test coverage.</p>
+            <div class="card-tech">
+              <span>Node.js</span><span>Express</span><span>PostgreSQL</span><span>Jest</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="showcase-card" data-category="fullstack">
+          <div class="card-visual visual-fullstack">
+            <div class="visual-pattern"></div>
+            <div class="visual-icon">🚀</div>
+          </div>
+          <div class="card-body">
+            <div class="card-tags">
+              <span class="card-tag" style="background:rgba(16,185,129,0.15);color:var(--success);">Full Stack</span>
+              <span class="card-tag" style="background:rgba(99,102,241,0.15);color:var(--primary-hover);">SaaS</span>
+            </div>
+            <h3>SaaS Dashboard</h3>
+            <p>Complete SaaS application: auth flow, Stripe integration, team management, real-time data dashboard, email notifications, and admin panel.</p>
+            <div class="card-tech">
+              <span>Next.js</span><span>Prisma</span><span>Stripe</span><span>Tailwind</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="showcase-card" data-category="devops">
+          <div class="card-visual visual-devops">
+            <div class="visual-pattern"></div>
+            <div class="visual-icon">🔧</div>
+          </div>
+          <div class="card-body">
+            <div class="card-tags">
+              <span class="card-tag" style="background:rgba(249,115,22,0.15);color:var(--orange);">DevOps</span>
+              <span class="card-tag" style="background:rgba(16,185,129,0.15);color:var(--success);">CI/CD</span>
+            </div>
+            <h3>CI/CD Pipeline Setup</h3>
+            <p>Complete CI/CD pipeline: GitHub Actions workflows, Docker builds, multi-stage deployments, automated testing, security scanning, and Slack notifications.</p>
+            <div class="card-tech">
+              <span>Docker</span><span>GitHub Actions</span><span>Terraform</span><span>AWS</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="showcase-card" data-category="data">
+          <div class="card-visual visual-data">
+            <div class="visual-pattern"></div>
+            <div class="visual-icon">📊</div>
+          </div>
+          <div class="card-body">
+            <div class="card-tags">
+              <span class="card-tag" style="background:rgba(139,92,246,0.15);color:var(--accent-2);">Data</span>
+              <span class="card-tag" style="background:rgba(236,72,153,0.15);color:var(--pink);">ML</span>
+            </div>
+            <h3>ML Pipeline & Dashboard</h3>
+            <p>End-to-end ML pipeline: data ingestion, feature engineering, model training, evaluation, deployment, and monitoring dashboard with drift detection.</p>
+            <div class="card-tech">
+              <span>Python</span><span>PyTorch</span><span>Pandas</span><span>FastAPI</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="showcase-card" data-category="creative">
+          <div class="card-visual visual-creative">
+            <div class="visual-pattern"></div>
+            <div class="visual-icon">✨</div>
+          </div>
+          <div class="card-body">
+            <div class="card-tags">
+              <span class="card-tag" style="background:rgba(236,72,153,0.15);color:var(--pink);">Creative</span>
+              <span class="card-tag" style="background:rgba(6,182,212,0.15);color:var(--accent);">WebGL</span>
+            </div>
+            <h3>Interactive 3D Website</h3>
+            <p>Immersive web experience with WebGL shaders, particle systems, scroll-triggered animations, and responsive design. The very site you could be building right now.</p>
+            <div class="card-tech">
+              <span>Three.js</span><span>GLSL</span><span>GSAP</span><span>WebGL</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="showcase-card" data-category="backend">
+          <div class="card-visual visual-backend">
+            <div class="visual-pattern"></div>
+            <div class="visual-icon">🗄️</div>
+          </div>
+          <div class="card-body">
+            <div class="card-tags">
+              <span class="card-tag" style="background:rgba(6,182,212,0.15);color:var(--accent);">Backend</span>
+              <span class="card-tag" style="background:rgba(139,92,246,0.15);color:var(--accent-2);">Database</span>
+            </div>
+            <h3>Database Migration System</h3>
+            <p>Zero-downtime database migration system with version control, rollback support, data validation, and comprehensive audit logging.</p>
+            <div class="card-tech">
+              <span>Go</span><span>PostgreSQL</span><span>Docker</span><span>Redis</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="showcase-card" data-category="frontend">
+          <div class="card-visual visual-frontend">
+            <div class="visual-pattern"></div>
+            <div class="visual-icon">📱</div>
+          </div>
+          <div class="card-body">
+            <div class="card-tags">
+              <span class="card-tag" style="background:rgba(99,102,241,0.15);color:var(--primary-hover);">Frontend</span>
+              <span class="card-tag" style="background:rgba(236,72,153,0.15);color:var(--pink);">Mobile</span>
+            </div>
+            <h3>Progressive Web App</h3>
+            <p>Full PWA with offline support, push notifications, background sync, app-like navigation, and install prompt — all from a single codebase.</p>
+            <div class="card-tech">
+              <span>React</span><span>Service Workers</span><span>IndexedDB</span><span>PWA</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="showcase-card" data-category="fullstack">
+          <div class="card-visual visual-fullstack">
+            <div class="visual-pattern"></div>
+            <div class="visual-icon">💬</div>
+          </div>
+          <div class="card-body">
+            <div class="card-tags">
+              <span class="card-tag" style="background:rgba(16,185,129,0.15);color:var(--success);">Full Stack</span>
+              <span class="card-tag" style="background:rgba(6,182,212,0.15);color:var(--accent);">Real-time</span>
+            </div>
+            <h3>Real-time Chat Platform</h3>
+            <p>Slack-like chat application with WebSocket connections, message history, file sharing, reactions, threads, and presence indicators.</p>
+            <div class="card-tech">
+              <span>Next.js</span><span>Socket.io</span><span>Redis</span><span>MongoDB</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Workflow ── -->
+  <section class="workflow">
+    <div class="container reveal">
+      <h2 class="workflow-title">How Qwen Works</h2>
+      <p class="workflow-desc">Every task follows the same disciplined workflow — understand, plan, implement, verify.</p>
+      <div class="workflow-steps">
+        <div class="workflow-step">
+          <div class="step-num">01</div>
+          <h4>Understand</h4>
+          <p>Read the codebase, analyze patterns, understand conventions, identify scope.</p>
+        </div>
+        <div class="workflow-step">
+          <div class="step-num">02</div>
+          <h4>Plan</h4>
+          <p>Create a task list, identify dependencies, estimate complexity, flag risks.</p>
+        </div>
+        <div class="workflow-step">
+          <div class="step-num">03</div>
+          <h4>Implement</h4>
+          <p>Write code that matches conventions, add tests, handle edge cases.</p>
+        </div>
+        <div class="workflow-step">
+          <div class="step-num">04</div>
+          <h4>Verify</h4>
+          <p>Run tests, check builds, lint code, type-check. Report real results.</p>
+        </div>
+        <div class="workflow-step">
+          <div class="step-num">05</div>
+          <h4>Report</h4>
+          <p>Clear summary of what changed, what was verified, and what's next.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Testimonials ── -->
+  <section class="testimonials">
+    <div class="container reveal">
+      <h2 class="testimonials-title">What Developers Say</h2>
+      <p class="testimonials-desc">Real feedback from real developers using Qwen in production workflows.</p>
+      <div class="testimonial-grid">
+        <div class="testimonial-card">
+          <div class="stars">★★★★★</div>
+          <blockquote>"Qwen understood our entire codebase in minutes and wrote code that looked like our team wrote it. The convention matching is insane."</blockquote>
+          <div class="author">
+            <div class="avatar">SK</div>
+            <div>
+              <div class="author-name">Sarah K.</div>
+              <div class="author-role">Senior Engineer, Fintech</div>
+            </div>
+          </div>
+        </div>
+        <div class="testimonial-card">
+          <div class="stars">★★★★★</div>
+          <blockquote>"I asked it to refactor a 2000-line function. It did it in 4 minutes, added tests I didn't ask for, and all 347 tests passed. I'm speechless."</blockquote>
+          <div class="author">
+            <div class="avatar">MR</div>
+            <div>
+              <div class="author-name">Marcus R.</div>
+              <div class="author-role">Tech Lead, E-commerce</div>
+            </div>
+          </div>
+        </div>
+        <div class="testimonial-card">
+          <div class="stars">★★★★★</div>
+          <blockquote>"The safety layer saved us. Qwen caught a potential production issue I hadn't even thought about and asked before making a risky change."</blockquote>
+          <div class="author">
+            <div class="avatar">JL</div>
+            <div>
+              <div class="author-name">Jamie L.</div>
+              <div class="author-role">DevOps Engineer, SaaS</div>
+            </div>
+          </div>
+        </div>
+        <div class="testimonial-card">
+          <div class="stars">★★★★★</div>
+          <blockquote>"It doesn't just write code — it explains what it's doing and why. Best mentoring experience I've ever had, and it's available 24/7."</blockquote>
+          <div class="author">
+            <div class="avatar">AP</div>
+            <div>
+              <div class="author-name">Alex P.</div>
+              <div class="author-role">Junior Developer, Startup</div>
+            </div>
+          </div>
+        </div>
+        <div class="testimonial-card">
+          <div class="stars">★★★★★</div>
+          <blockquote>"Replaced our entire sprint of 'boring tasks' in one afternoon. Tests, migrations, API docs — all done while I worked on the hard stuff."</blockquote>
+          <div class="author">
+            <div class="avatar">TN</div>
+            <div>
+              <div class="author-name">Tanya N.</div>
+              <div class="author-role">Engineering Manager, Health Tech</div>
+            </div>
+          </div>
+        </div>
+        <div class="testimonial-card">
+          <div class="stars">★★★★★</div>
+          <blockquote>"I told it to debug a race condition that had haunted us for months. It found the issue in 10 minutes. TEN MINUTES. We'd been stuck for weeks."</blockquote>
+          <div class="author">
+            <div class="avatar">DV</div>
+            <div>
+              <div class="author-name">David V.</div>
+              <div class="author-role">Staff Engineer, Infrastructure</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Comparison ── -->
+  <section class="comparison">
+    <div class="container reveal">
+      <h2 class="comparison-title">Qwen vs. The Rest</h2>
+      <table class="comparison-table">
+        <tr>
+          <th>Feature</th>
+          <th>Qwen Code</th>
+          <th>Generic AI Chat</th>
+          <th>Code Copilots</th>
+        </tr>
+        <tr>
+          <td>Convention Awareness</td>
+          <td class="check">✓ Deep — reads your entire codebase</td>
+          <td class="cross">✗ No project context</td>
+          <td class="partial">◐ Limited file context</td>
+        </tr>
+        <tr>
+          <td>Multi-File Editing</td>
+          <td class="check">✓ Coordinated across entire project</td>
+          <td class="cross">✗ Single file only</td>
+          <td class="partial">◐ Current file + tabs</td>
+        </tr>
+        <tr>
+          <td>Test Verification</td>
+          <td class="check">✓ Runs your test suite automatically</td>
+          <td class="cross">✗ Cannot run code</td>
+          <td class="cross">✗ Cannot run code</td>
+        </tr>
+        <tr>
+          <td>Safety Layer</td>
+          <td class="check">✓ Multi-layer risk classification</td>
+          <td class="partial">◐ Basic content filters</td>
+          <td class="partial">◐ Basic content filters</td>
+        </tr>
+        <tr>
+          <td>Shell Integration</td>
+          <td class="check">✓ Full terminal access</td>
+          <td class="cross">✗ None</td>
+          <td class="cross">✗ None</td>
+        </tr>
+        <tr>
+          <td>Memory System</td>
+          <td class="check">✓ Persistent across sessions</td>
+          <td class="cross">✗ No memory</td>
+          <td class="partial">◐ Limited session context</td>
+        </tr>
+        <tr>
+          <td>Subagent Delegation</td>
+          <td class="check">✓ Parallel specialized agents</td>
+          <td class="cross">✗ Single thread</td>
+          <td class="cross">✗ Single thread</td>
+        </tr>
+        <tr>
+          <td>Open Source Base Model</td>
+          <td class="check">✓ Apache 2.0</td>
+          <td class="cross">✗ Proprietary</td>
+          <td class="cross">✗ Proprietary</td>
+        </tr>
+        <tr>
+          <td>Honest Reporting</td>
+          <td class="check">✓ Reports real results, never fabricates</td>
+          <td class="partial">◐ Sometimes hallucinates</td>
+          <td class="partial">◐ Sometimes hallucinates</td>
+        </tr>
+        <tr>
+          <td>Self-Awareness</td>
+          <td class="check">✓ Has an entire website about it</td>
+          <td class="cross">✗ Nope</td>
+          <td class="cross">✗ Nope</td>
+        </tr>
+      </table>
+    </div>
+  </section>
+
+  <footer>
+    <div class="footer-text">
+      © 2026 Qwen by Alibaba Group — <a href="index.html">Home</a> · <a href="docs.html">Docs</a> · <a href="tech.html">Tech</a> · <a href="jokes.html">Humor</a>
+    </div>
+  </footer>
+
+  <script>
+    // Filter tabs
+    const tabs = document.querySelectorAll('.filter-tab');
+    const cards = document.querySelectorAll('.showcase-card');
+
+    tabs.forEach(tab => {
+      tab.addEventListener('click', () => {
+        tabs.forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+        const filter = tab.dataset.filter;
+
+        cards.forEach(card => {
+          if (filter === 'all' || card.dataset.category === filter) {
+            card.style.display = 'block';
+            card.style.animation = 'fadeInUp 0.5s ease forwards';
+          } else {
+            card.style.display = 'none';
+          }
+        });
+      });
+    });
+
+    // Reveal
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) entry.target.classList.add('visible');
+      });
+    }, { threshold: 0.1 });
+    document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+    // Fade in animation
+    const style = document.createElement('style');
+    style.textContent = `@keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }`;
+    document.head.appendChild(style);
+  </script>
+</body>
+</html>

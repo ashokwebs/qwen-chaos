@@ -1,0 +1,655 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Qwen Docs — The Complete Guide</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+    :root {
+      --bg: #0a0a0f; --bg-alt: #12121a; --text: #ffffff;
+      --text-secondary: #a1a1aa; --text-muted: #71717a;
+      --primary: #6366f1; --primary-hover: #818cf8; --accent: #06b6d4;
+      --accent-2: #8b5cf6; --success: #10b981; --warning: #f59e0b;
+      --border: rgba(255,255,255,0.1);
+      --gradient: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #06b6d4 100%);
+    }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: 'Inter', -apple-system, sans-serif;
+      background: var(--bg); color: var(--text);
+      line-height: 1.6;
+    }
+    a { color: var(--primary-hover); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    code, pre { font-family: 'JetBrains Mono', monospace; }
+    code { background: rgba(99,102,241,0.1); padding: 0.15rem 0.4rem; border-radius: 4px; font-size: 0.85em; }
+    pre { background: var(--bg-alt); border: 1px solid var(--border); border-radius: 12px; padding: 1.5rem; overflow-x: auto; margin: 1rem 0 2rem; }
+    pre code { background: none; padding: 0; }
+
+    /* Layout */
+    .docs-layout {
+      display: grid;
+      grid-template-columns: 260px 1fr;
+      min-height: 100vh;
+    }
+
+    /* Sidebar */
+    .sidebar {
+      background: var(--bg-alt);
+      border-right: 1px solid var(--border);
+      padding: 2rem 1.5rem;
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      overflow-y: auto;
+    }
+
+    .sidebar-logo {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 1.3rem;
+      font-weight: 700;
+      background: var(--gradient);
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 0.5rem;
+      text-decoration: none;
+      display: block;
+    }
+
+    .sidebar-logo:hover { text-decoration: none; }
+
+    .sidebar-version {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.7rem;
+      color: var(--text-muted);
+      letter-spacing: 1px;
+      margin-bottom: 2rem;
+      padding-bottom: 1.5rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .sidebar-section {
+      margin-bottom: 1.5rem;
+    }
+
+    .sidebar-section-title {
+      font-size: 0.7rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      color: var(--text-muted);
+      margin-bottom: 0.75rem;
+    }
+
+    .sidebar-link {
+      display: block;
+      padding: 0.4rem 0.75rem;
+      color: var(--text-secondary);
+      font-size: 0.85rem;
+      border-radius: 6px;
+      transition: all 0.2s;
+      margin-bottom: 0.2rem;
+    }
+
+    .sidebar-link:hover {
+      color: var(--text);
+      background: rgba(99,102,241,0.1);
+      text-decoration: none;
+    }
+
+    .sidebar-link.active {
+      color: var(--primary-hover);
+      background: rgba(99,102,241,0.15);
+      font-weight: 600;
+    }
+
+    /* Main Content */
+    .docs-main {
+      padding: 3rem 4rem;
+      max-width: 900px;
+    }
+
+    .docs-breadcrumb {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      margin-bottom: 2rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .docs-breadcrumb a { color: var(--text-muted); }
+    .docs-breadcrumb a:hover { color: var(--primary); }
+
+    h1 {
+      font-size: 2.5rem;
+      font-weight: 800;
+      margin-bottom: 0.5rem;
+    }
+
+    h2 {
+      font-size: 1.6rem;
+      font-weight: 700;
+      margin-top: 3rem;
+      margin-bottom: 1rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    h3 {
+      font-size: 1.2rem;
+      font-weight: 600;
+      margin-top: 2rem;
+      margin-bottom: 0.75rem;
+    }
+
+    p {
+      color: var(--text-secondary);
+      margin-bottom: 1rem;
+      font-size: 1rem;
+    }
+
+    .lead {
+      font-size: 1.15rem;
+      color: var(--text-secondary);
+      margin-bottom: 2rem;
+      padding-bottom: 2rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    ul, ol {
+      color: var(--text-secondary);
+      margin-bottom: 1.5rem;
+      padding-left: 1.5rem;
+    }
+
+    li { margin-bottom: 0.5rem; }
+
+    /* Callout Boxes */
+    .callout {
+      padding: 1.25rem 1.5rem;
+      border-radius: 12px;
+      margin: 1.5rem 0;
+      border-left: 4px solid;
+    }
+
+    .callout-info {
+      background: rgba(6, 182, 212, 0.1);
+      border-color: var(--accent);
+    }
+
+    .callout-warning {
+      background: rgba(245, 158, 11, 0.1);
+      border-color: var(--warning);
+    }
+
+    .callout-success {
+      background: rgba(16, 185, 129, 0.1);
+      border-color: var(--success);
+    }
+
+    .callout-title {
+      font-weight: 700;
+      font-size: 0.9rem;
+      margin-bottom: 0.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .callout-info .callout-title { color: var(--accent); }
+    .callout-warning .callout-title { color: var(--warning); }
+    .callout-success .callout-title { color: var(--success); }
+
+    .callout p { margin-bottom: 0; font-size: 0.9rem; }
+
+    /* Table */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1rem 0 2rem;
+    }
+
+    th, td {
+      padding: 0.75rem 1rem;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+    }
+
+    th {
+      font-weight: 600;
+      font-size: 0.85rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--text-muted);
+    }
+
+    td { color: var(--text-secondary); font-size: 0.9rem; }
+
+    /* Nav Bar */
+    .docs-nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1rem 2rem;
+      background: rgba(10,10,15,0.8);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .docs-nav a {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 1.2rem;
+      font-weight: 700;
+      background: var(--gradient);
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .docs-nav a:hover { text-decoration: none; }
+
+    .docs-nav-links {
+      display: flex;
+      gap: 1.5rem;
+    }
+
+    .docs-nav-links a {
+      font-family: 'Inter', sans-serif;
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      background: none;
+      -webkit-text-fill-color: var(--text-secondary);
+    }
+
+    .docs-nav-links a:hover { color: var(--text); -webkit-text-fill-color: var(--text); }
+
+    /* Search */
+    .search-box {
+      width: 100%;
+      padding: 0.6rem 1rem;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text);
+      font-size: 0.85rem;
+      margin-bottom: 1.5rem;
+      outline: none;
+      transition: border-color 0.3s;
+    }
+
+    .search-box:focus { border-color: var(--primary); }
+    .search-box::placeholder { color: var(--text-muted); }
+
+    /* Responsive */
+    @media (max-width: 900px) {
+      .docs-layout { grid-template-columns: 1fr; }
+      .sidebar { position: relative; height: auto; border-right: none; border-bottom: 1px solid var(--border); }
+      .docs-main { padding: 2rem 1.5rem; }
+    }
+  </style>
+</head>
+<body>
+  <div class="docs-nav">
+    <a href="index.html">← Qwen</a>
+    <div class="docs-nav-links">
+      <a href="index.html">Home</a>
+      <a href="tech.html">Tech</a>
+      <a href="showcase.html">Showcase</a>
+      <a href="jokes.html">Humor</a>
+    </div>
+  </div>
+
+  <div class="docs-layout">
+    <aside class="sidebar">
+      <a href="index.html" class="sidebar-logo">Qwen Docs</a>
+      <div class="sidebar-version">v3.0.0 • last updated Jul 2026</div>
+
+      <input type="text" class="search-box" placeholder="Search docs..." id="searchBox">
+
+      <div class="sidebar-section">
+        <div class="sidebar-section-title">Getting Started</div>
+        <a href="#introduction" class="sidebar-link active">Introduction</a>
+        <a href="#installation" class="sidebar-link">Installation</a>
+        <a href="#quick-start" class="sidebar-link">Quick Start</a>
+        <a href="#first-conversation" class="sidebar-link">First Conversation</a>
+      </div>
+
+      <div class="sidebar-section">
+        <div class="sidebar-section-title">Core Concepts</div>
+        <a href="#philosophy" class="sidebar-link">Philosophy</a>
+        <a href="#conventions" class="sidebar-link">Conventions</a>
+        <a href="#safety" class="sidebar-link">Safety & Verification</a>
+        <a href="#context" class="sidebar-link">Context Awareness</a>
+      </div>
+
+      <div class="sidebar-section">
+        <div class="sidebar-section-title">Features</div>
+        <a href="#code-generation" class="sidebar-link">Code Generation</a>
+        <a href="#file-operations" class="sidebar-link">File Operations</a>
+        <a href="#debugging" class="sidebar-link">Debugging</a>
+        <a href="#refactoring" class="sidebar-link">Refactoring</a>
+        <a href="#architecture" class="sidebar-link">Architecture Design</a>
+      </div>
+
+      <div class="sidebar-section">
+        <div class="sidebar-section-title">Advanced</div>
+        <a href="#multi-file" class="sidebar-link">Multi-File Editing</a>
+        <a href="#testing" class="sidebar-link">Testing & Verification</a>
+        <a href="#subagents" class="sidebar-link">Subagent Delegation</a>
+        <a href="#memory" class="sidebar-link">Memory System</a>
+        <a href="#tools" class="sidebar-link">Tool Integration</a>
+      </div>
+
+      <div class="sidebar-section">
+        <div class="sidebar-section-title">Reference</div>
+        <a href="#commands" class="sidebar-link">Commands</a>
+        <a href="#config" class="sidebar-link">Configuration</a>
+        <a href="#troubleshooting" class="sidebar-link">Troubleshooting</a>
+      </div>
+    </aside>
+
+    <main class="docs-main">
+      <div class="docs-breadcrumb">
+        <a href="index.html">Home</a> / <span>Documentation</span>
+      </div>
+
+      <h1 id="introduction">Introduction to Qwen</h1>
+      <p class="lead">
+        Qwen is an AI coding companion built by Alibaba Group. It lives in your terminal, understands your codebase, and writes code that respects your conventions. Think of it as a senior engineer who never sleeps, never gets tired, and always reads the docs first.
+      </p>
+
+      <div class="callout callout-info">
+        <div class="callout-title">ℹ️ What makes Qwen different</div>
+        <p>Unlike generic AI chatbots, Qwen Code is purpose-built for software engineering. It understands project structure, respects conventions, runs tests before claiming success, and investigates before acting. It's not a chatbot — it's a collaborator.</p>
+      </div>
+
+      <h2 id="installation">Installation</h2>
+      <p>Qwen Code can be installed via npm:</p>
+      <pre><code>npm install -g qwen-code</code></pre>
+      <p>Or using the install script:</p>
+      <pre><code>curl -fsSL https://get.qwen.ai | bash</code></pre>
+
+      <h3>Requirements</h3>
+      <table>
+        <tr><th>Requirement</th><th>Version</th><th>Notes</th></tr>
+        <tr><td>Node.js</td><td>18+</td><td>Required for npm install</td></tr>
+        <tr><td>Git</td><td>2.30+</td><td>For repository operations</td></tr>
+        <tr><td>OS</td><td>Any</td><td>macOS, Linux, Windows supported</td></tr>
+        <tr><td>Memory</td><td>4GB+</td><td>Recommended for large projects</td></tr>
+      </table>
+
+      <h2 id="quick-start">Quick Start</h2>
+      <p>Navigate to any project directory and start Qwen:</p>
+      <pre><code>cd your-project
+qwen</code></pre>
+      <p>That's it. Qwen will read your project structure, understand your conventions, and be ready to help.</p>
+
+      <h3>Your First Prompt</h3>
+      <pre><code># Just tell Qwen what you need:
+"Fix the authentication bug in src/auth.py"
+"Add unit tests for the user service"
+"Refactor this function to use async/await"
+"Explain what this codebase does"</code></pre>
+
+      <div class="callout callout-success">
+        <div class="callout-title">✅ Pro Tip</div>
+        <p>Be specific. "Fix the bug where users can't log in with special characters in their password" gets better results than "fix the login bug." Qwen works best with clear, detailed prompts.</p>
+      </div>
+
+      <h2 id="first-conversation">Your First Conversation</h2>
+      <p>Here's what a typical Qwen session looks like:</p>
+      <pre><code>You: "Add input validation to the signup form"
+
+Qwen: Let me check the current signup form structure...
+  → Reading src/components/SignupForm.tsx
+  → Checking existing validation patterns in the codebase
+
+  I see the project uses Zod for validation. I'll add validation
+  following the same pattern used in LoginForm.tsx.
+
+  [Writes code, runs tests, reports results]
+
+  ✅ All 47 tests passing. Validation added for:
+  - Email format (regex)
+  - Password strength (min 8 chars, 1 number, 1 special)
+  - Username (3-20 chars, alphanumeric)
+
+You: "Perfect, thanks"</code></pre>
+
+      <h2 id="philosophy">Core Philosophy</h2>
+      <p>Qwen operates on five core principles:</p>
+      <ol>
+        <li><strong>Conventions First:</strong> Always match existing project style, patterns, and idioms.</li>
+        <li><strong>Investigate Before Acting:</strong> Read surrounding code, tests, and config before making changes.</li>
+        <li><strong>Minimal Changes:</strong> Only modify what's asked. No scope creep, no premature abstractions.</li>
+        <li><strong>Verify Everything:</strong> Run tests, check builds, confirm results. Never claim success without proof.</li>
+        <li><strong>Honest & Direct:</strong> If something fails, say so. If you can't help, explain why.</li>
+      </ol>
+
+      <h2 id="conventions">Convention Awareness</h2>
+      <p>Before writing any code, Qwen:</p>
+      <ul>
+        <li>Reads the project's <code>package.json</code>, <code>Cargo.toml</code>, <code>pyproject.toml</code>, or equivalent</li>
+        <li>Analyzes existing code style: naming conventions, import patterns, file structure</li>
+        <li>Checks for linter configs: <code>.eslintrc</code>, <code>.prettierrc</code>, <code>ruff.toml</code></li>
+        <li>Reads <code>README.md</code>, <code>CONTRIBUTING.md</code>, and any project documentation</li>
+        <li>Studies neighboring files to match the exact coding patterns in use</li>
+      </ul>
+
+      <div class="callout callout-warning">
+        <div class="callout-title">⚠️ Why this matters</div>
+        <p>If your project uses camelCase, Qwen won't suddenly write snake_case. If you import React components with named imports, Qwen won't use default imports. Convention consistency is non-negotiable.</p>
+      </div>
+
+      <h2 id="safety">Safety & Verification</h2>
+      <p>Qwen treats your codebase with extreme care:</p>
+
+      <h3>What Qwen will do freely:</h3>
+      <ul>
+        <li>Read any file in your project</li>
+        <li>Edit files within your project directory</li>
+        <li>Run tests and build commands</li>
+        <li>Create new files following project patterns</li>
+      </ul>
+
+      <h3>What Qwen will ask about first:</h3>
+      <ul>
+        <li>Destructive operations (deleting files, dropping tables)</li>
+        <li>Actions outside your project directory</li>
+        <li>Pushing to remote repositories</li>
+        <li>Modifying system configuration</li>
+        <li>Sending messages or making API calls</li>
+      </ul>
+
+      <h2 id="context">Context Awareness</h2>
+      <p>Qwen builds a rich understanding of your project:</p>
+      <pre><code>Project Context Includes:
+├── Directory structure & file tree
+├── Package dependencies & versions
+├── Build scripts & CI/CD config
+├── Existing code patterns & architecture
+├── Test framework & coverage
+├── Linting & formatting rules
+├── Git history & recent changes
+└── Any .qwen/ or QWEN.md configuration</code></pre>
+
+      <h2 id="code-generation">Code Generation</h2>
+      <p>When generating code, Qwen follows these rules:</p>
+      <ol>
+        <li>Read existing similar code first</li>
+        <li>Match the project's style exactly</li>
+        <li>Only add what's needed — no extras</li>
+        <li>Include tests for new functionality</li>
+        <li>Run linters and type checkers after writing</li>
+      </ol>
+
+      <h3>Example: Adding a New Endpoint</h3>
+      <pre><code>You: "Add a GET /api/users/:id endpoint"
+
+Qwen will:
+1. Read existing route files to match patterns
+2. Check the database schema for user fields
+3. Look at existing controllers for the style
+4. Write the endpoint matching all conventions
+5. Add validation matching existing patterns
+6. Write tests matching the test framework
+7. Run the test suite to verify
+8. Run linting to ensure style compliance</code></pre>
+
+      <h2 id="file-operations">File Operations</h2>
+      <p>Qwen uses dedicated tools for all file operations:</p>
+      <table>
+        <tr><th>Operation</th><th>Tool</th><th>Description</th></tr>
+        <tr><td>Read</td><td><code>read_file</code></td><td>Read file contents with pagination</td></tr>
+        <tr><td>Write</td><td><code>write_file</code></td><td>Create or overwrite files</td></tr>
+        <tr><td>Edit</td><td><code>edit</code></td><td>Surgical replacements in files</td></tr>
+        <tr><td>Search</td><td><code>grep_search</code></td><td>Content search with regex</td></tr>
+        <tr><td>Find</td><td><code>glob</code></td><td>File discovery by pattern</td></tr>
+        <tr><td>List</td><td><code>list_directory</code></td><td>Directory contents</td></tr>
+      </table>
+
+      <h2 id="debugging">Debugging</h2>
+      <p>When debugging, Qwen follows a systematic approach:</p>
+      <ol>
+        <li><strong>Reproduce:</strong> Read the error message, stack trace, or symptoms</li>
+        <li><strong>Locate:</strong> Search for the relevant code, trace the call chain</li>
+        <li><strong>Understand:</strong> Read surrounding context, check git history</li>
+        <li><strong>Fix:</strong> Apply the minimal change that resolves the root cause</li>
+        <li><strong>Verify:</strong> Run tests, confirm the fix works</li>
+        <li><strong>Report:</strong> Explain what was wrong and how it was fixed</li>
+      </ol>
+
+      <h2 id="refactoring">Refactoring</h2>
+      <p>Qwen refactors with surgical precision:</p>
+      <ul>
+        <li>Never changes behavior — only structure</li>
+        <li>Runs tests before and after to confirm equivalence</li>
+        <li>Respects the project's existing abstractions</li>
+        <li>Only refactors what's asked for — no drive-by improvements</li>
+      </ul>
+
+      <h2 id="architecture">Architecture Design</h2>
+      <p>When designing new systems or features, Qwen:</p>
+      <ul>
+        <li>Understands existing architecture patterns</li>
+        <li>Proposes designs that fit the current system</li>
+        <li>Considers scalability, maintainability, and testability</li>
+        <li>Explains trade-offs clearly</li>
+      </ul>
+
+      <h2 id="multi-file">Multi-File Editing</h2>
+      <p>Qwen can orchestrate changes across multiple files in a single task:</p>
+      <pre><code>You: "Add a new UserSettings feature with full CRUD"
+
+Qwen will coordinate:
+  → models/UserSettings.ts     (data model)
+  → routes/userSettings.ts     (API routes)
+  → controllers/userSettings.ts (business logic)
+  → tests/userSettings.test.ts (test suite)
+  → migrations/004_user_settings.sql (database)
+  → types/UserSettings.d.ts    (type definitions)</code></pre>
+
+      <h2 id="testing">Testing & Verification</h2>
+      <p>Qwen verifies everything it builds:</p>
+      <ul>
+        <li>Identifies the project's test framework (Jest, pytest, go test, etc.)</li>
+        <li>Runs the full test suite after changes</li>
+        <li>Checks build outputs for errors</li>
+        <li>Runs linters and type checkers</li>
+        <li>Reports actual results — never fabricates success</li>
+      </ul>
+
+      <div class="callout callout-warning">
+        <div class="callout-title">⚠️ Honesty Policy</div>
+        <p>If tests fail, Qwen says so. If it can't run verification, it says that too. "All tests pass" means Qwen actually ran them and saw green output. No exceptions.</p>
+      </div>
+
+      <h2 id="subagents">Subagent Delegation</h2>
+      <p>For complex tasks, Qwen can spawn specialized subagents:</p>
+      <ul>
+        <li><strong>Explore Agent:</strong> Deep codebase exploration and research</li>
+        <li><strong>General-purpose Agent:</strong> Multi-step research and analysis</li>
+        <li><strong>Statusline Agent:</strong> Configuration helpers</li>
+      </ul>
+
+      <h2 id="memory">Memory System</h2>
+      <p>Qwen maintains persistent memory across sessions:</p>
+      <ul>
+        <li><strong>User Memory:</strong> Your preferences, role, expertise level</li>
+        <li><strong>Project Memory:</strong> Ongoing work, goals, and context</li>
+        <li><strong>Feedback Memory:</strong> Corrections and validated approaches</li>
+        <li><strong>Reference Memory:</strong> External resources and systems</li>
+      </ul>
+
+      <h2 id="tools">Tool Integration</h2>
+      <p>Qwen integrates with your development environment through dedicated tools:</p>
+      <pre><code>Available Tools:
+├── File System: read, write, edit, search, glob
+├── Shell: run_shell_command (for git, npm, etc.)
+├── Search: grep_search, glob patterns
+├── Notebook: Jupyter notebook editing
+├── Task Management: todo tracking
+├── Subagents: delegated work
+├── MCP: Model Context Protocol servers
+└── Custom: project-specific tools</code></pre>
+
+      <h2 id="commands">Commands Reference</h2>
+      <table>
+        <tr><th>Command</th><th>Description</th></tr>
+        <tr><td><code>/help</code></td><td>Show help information</td></tr>
+        <tr><td><code>/review</code></td><td>Review code changes</td></tr>
+        <tr><td><code>/simplify</code></td><td>Clean up recent changes</td></tr>
+        <tr><td><code>/batch</code></td><td>Batch operations on files</td></tr>
+        <tr><td><code>/loop</code></td><td>Create recurring tasks</td></tr>
+        <tr><td><code>/stuck</code></td><td>Diagnose slow sessions</td></tr>
+        <tr><td><code>/qc-helper</code></td><td>Qwen Code configuration help</td></tr>
+        <tr><td><code>/bug</code></td><td>Report a bug</td></tr>
+      </table>
+
+      <h2 id="config">Configuration</h2>
+      <p>Configure Qwen through project files:</p>
+      <pre><code># .qwen/settings.json
+{
+  "approvalMode": "default",
+  "outputLanguage": "English",
+  "customInstructions": "Always prefer TypeScript over JavaScript"
+}
+
+# QWEN.md (project-level instructions)
+# Add custom instructions for this project
+
+# AGENTS.md (agent-level configuration)
+# Configure subagent behavior</code></pre>
+
+      <h2 id="troubleshooting">Troubleshooting</h2>
+
+      <h3>Qwen is running slowly</h3>
+      <p>Use <code>/stuck</code> to diagnose performance issues. Common causes:</p>
+      <ul>
+        <li>Large project with many files — Qwen is building context</li>
+        <li>Network latency to the API endpoint</li>
+        <li>Complex multi-file operations in progress</li>
+      </ul>
+
+      <h3>Qwen doesn't understand my project</h3>
+      <p>Add a <code>QWEN.md</code> file to your project root with project-specific instructions. Qwen will read it automatically.</p>
+
+      <h3>Tests aren't running</h3>
+      <p>Make sure your test command is in <code>package.json</code> scripts, or tell Qwen explicitly how to run tests.</p>
+
+      <div class="callout callout-info">
+        <div class="callout-title">ℹ️ Need more help?</div>
+        <p>Use <code>/qc-helper</code> inside Qwen for configuration help, or <code>/bug</code> to report issues. You can also check the <a href="https://github.com/QwenLM/qwen-code">GitHub repository</a> for the latest updates.</p>
+      </div>
+    </main>
+  </div>
+</body>
+</html>

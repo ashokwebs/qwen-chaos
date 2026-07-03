@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Qwen Playground — Try It Live</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+    :root {
+      --bg: #0a0a0f; --bg-alt: #12121a; --bg-card: #16161f;
+      --text: #ffffff; --text-secondary: #a1a1aa; --text-muted: #71717a;
+      --primary: #6366f1; --primary-hover: #818cf8; --accent: #06b6d4;
+      --accent-2: #8b5cf6; --success: #10b981; --warning: #f59e0b;
+      --border: rgba(255,255,255,0.1);
+      --gradient: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #06b6d4 100%);
+    }
+    html { scroll-behavior: smooth; }
+    body { font-family: 'Inter', -apple-system, sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; }
+    a { color: var(--primary-hover); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    .top-nav {
+      position: sticky; top: 0; z-index: 100;
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 1rem 2rem; background: rgba(10,10,15,0.85); backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border);
+    }
+    .top-nav .logo {
+      font-family: 'JetBrains Mono', monospace; font-size: 1.2rem; font-weight: 700;
+      background: var(--gradient); -webkit-background-clip: text; background-clip: text;
+      -webkit-text-fill-color: transparent; text-decoration: none;
+    }
+    .top-nav .logo:hover { text-decoration: none; }
+    .top-nav-links { display: flex; gap: 1.5rem; }
+    .top-nav-links a { font-size: 0.85rem; color: var(--text-secondary); }
+    .top-nav-links a:hover { color: var(--text); text-decoration: none; }
+
+    .hero { text-align: center; padding: 4rem 2rem 2rem; }
+    .hero h1 { font-size: clamp(2rem, 5vw, 3rem); font-weight: 800; margin-bottom: 0.5rem; }
+    .hero h1 .gradient { background: var(--gradient); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+    .hero p { font-size: 1rem; color: var(--text-secondary); max-width: 500px; margin: 0 auto; }
+
+    .container { max-width: 900px; margin: 0 auto; padding: 0 2rem; }
+
+    /* Terminal */
+    .terminal {
+      background: var(--bg-card); border: 1px solid var(--border);
+      border-radius: 16px; overflow: hidden; margin: 2rem 0;
+    }
+
+    .terminal-header {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 0.75rem 1.5rem; background: rgba(255,255,255,0.03);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .terminal-dots {
+      display: flex; gap: 0.5rem;
+    }
+    .terminal-dot {
+      width: 12px; height: 12px; border-radius: 50%;
+    }
+    .dot-red { background: #ef4444; }
+    .dot-yellow { background: #f59e0b; }
+    .dot-green { background: #10b981; }
+
+    .terminal-title {
+      font-family: 'JetBrains Mono', monospace; font-size: 0.75rem;
+      color: var(--text-muted);
+    }
+
+    .terminal-body {
+      padding: 1.5rem; min-height: 400px; max-height: 600px;
+      overflow-y: auto; font-family: 'JetBrains Mono', monospace;
+      font-size: 0.8rem;
+    }
+
+    .msg {
+      margin-bottom: 1rem; line-height: 1.7;
+    }
+
+    .msg-user {
+      color: var(--accent);
+    }
+    .msg-user::before {
+      content: '> '; color: var(--text-muted);
+    }
+
+    .msg-qwen {
+      color: var(--text-secondary);
+      padding-left: 1rem;
+      border-left: 2px solid var(--primary);
+      margin-left: 0.5rem;
+    }
+
+    .msg-qwen .qwen-label {
+      color: var(--primary-hover); font-weight: 600; margin-bottom: 0.25rem;
+      font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1px;
+    }
+
+    .msg-qwen .action {
+      color: var(--success); font-size: 0.75rem;
+      display: flex; align-items: center; gap: 0.5rem;
+      margin-top: 0.5rem;
+    }
+
+    .msg-qwen .action::before {
+      content: '→'; color: var(--text-muted);
+    }
+
+    .msg-qwen .result {
+      color: var(--success); font-weight: 600;
+    }
+
+    .msg-qwen .error {
+      color: var(--warning);
+    }
+
+    .terminal-input {
+      display: flex; align-items: center; gap: 0.5rem;
+      padding: 1rem 1.5rem; border-top: 1px solid var(--border);
+      background: rgba(255,255,255,0.02);
+    }
+
+    .terminal-input-label {
+      font-family: 'JetBrains Mono', monospace; font-size: 0.8rem;
+      color: var(--accent);
+    }
+
+    .terminal-input-field {
+      flex: 1; background: none; border: none; color: var(--text);
+      font-family: 'JetBrains Mono', monospace; font-size: 0.8rem;
+      outline: none;
+    }
+
+    .terminal-input-field::placeholder { color: var(--text-muted); }
+
+    /* Example Cards */
+    .examples {
+      padding: 2rem 0 4rem;
+    }
+    .examples-title { font-size: 1.3rem; font-weight: 700; margin-bottom: 1.5rem; }
+    .examples-grid {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem;
+    }
+    .example-card {
+      background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px;
+      padding: 1.5rem; cursor: pointer; transition: all 0.3s;
+    }
+    .example-card:hover { border-color: var(--primary); transform: translateY(-2px); }
+    .example-card .example-label {
+      font-size: 0.65rem; font-weight: 600; text-transform: uppercase;
+      letter-spacing: 1px; margin-bottom: 0.5rem;
+    }
+    .example-card .example-text {
+      font-family: 'JetBrains Mono', monospace; font-size: 0.8rem;
+      color: var(--text-secondary);
+    }
+    .label-code { color: var(--primary-hover); }
+    .label-debug { color: var(--warning); }
+    .label-refactor { color: var(--accent); }
+    .label-explain { color: var(--accent-2); }
+
+    /* Typing animation */
+    .typing {
+      display: inline-block;
+      color: var(--primary);
+    }
+    .typing::after {
+      content: '▊'; animation: blink 0.8s step-end infinite;
+    }
+    @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+
+    footer { border-top: 1px solid var(--border); padding: 3rem 2rem; text-align: center; }
+    .footer-text { font-size: 0.8rem; color: var(--text-muted); }
+
+    @media (max-width: 768px) {
+      .top-nav-links { display: none; }
+      .examples-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <nav class="top-nav">
+    <a href="index.html" class="logo">← Qwen</a>
+    <div class="top-nav-links">
+      <a href="index.html">Home</a>
+      <a href="docs.html">Docs</a>
+      <a href="tech.html">Tech</a>
+      <a href="showcase.html">Showcase</a>
+      <a href="jokes.html">Humor</a>
+    </div>
+  </nav>
+
+  <section class="hero">
+    <h1>The <span class="gradient">Playground</span></h1>
+    <p>Type a prompt and watch Qwen respond. This is a simulated demo — but the real thing works exactly like this.</p>
+  </section>
+
+  <section>
+    <div class="container">
+      <div class="terminal">
+        <div class="terminal-header">
+          <div class="terminal-dots">
+            <div class="terminal-dot dot-red"></div>
+            <div class="terminal-dot dot-yellow"></div>
+            <div class="terminal-dot dot-green"></div>
+          </div>
+          <div class="terminal-title">qwen-code v3.0.0 — demo session</div>
+        </div>
+        <div class="terminal-body" id="terminalBody">
+          <div class="msg msg-qwen">
+            <div class="qwen-label">QWEN</div>
+            Welcome! I'm Qwen, your AI coding companion. I understand your codebase, respect your conventions, and verify everything I build. Type a prompt or click an example below to see me work.
+          </div>
+        </div>
+        <div class="terminal-input">
+          <span class="terminal-input-label">▸</span>
+          <input type="text" class="terminal-input-field" id="promptInput" placeholder="Type your prompt here..." autocomplete="off">
+        </div>
+      </div>
+
+      <div class="examples">
+        <div class="examples-title">Try These Examples</div>
+        <div class="examples-grid">
+          <div class="example-card" onclick="runExample('add-auth')">
+            <div class="example-label label-code">Code Generation</div>
+            <div class="example-text">Add JWT authentication to my Express API</div>
+          </div>
+          <div class="example-card" onclick="runExample('debug-error')">
+            <div class="example-label label-debug">Debugging</div>
+            <div class="example-text">Fix the TypeError in src/utils/parser.js</div>
+          </div>
+          <div class="example-card" onclick="runExample('refactor')">
+            <div class="example-label label-refactor">Refactoring</div>
+            <div class="example-text">Refactor the database queries to use async/await</div>
+          </div>
+          <div class="example-card" onclick="runExample('explain')">
+            <div class="example-label label-explain">Explanation</div>
+            <div class="example-text">Explain what this codebase does and how it's structured</div>
+          </div>
+          <div class="example-card" onclick="runExample('add-tests')">
+            <div class="example-label label-code">Testing</div>
+            <div class="example-text">Add unit tests for the UserService class</div>
+          </div>
+          <div class="example-card" onclick="runExample('migrate')">
+            <div class="example-label label-refactor">Migration</div>
+            <div class="example-text">Create a database migration for the new users table</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <div class="footer-text">
+      © 2026 Qwen by Alibaba Group — <a href="index.html">Home</a> · <a href="docs.html">Docs</a> · <a href="tech.html">Tech</a> · <a href="showcase.html">Showcase</a>
+      <br><br>
+      <em>This is a simulated demo. Real Qwen responses are even better.</em>
+    </div>
+  </footer>
+
+  <script>
+    const terminalBody = document.getElementById('terminalBody');
+    const promptInput = document.getElementById('promptInput');
+
+    // Simulated responses
+    const responses = {
+      'add-auth': [
+        { type: 'action', text: 'Reading existing route structure...' },
+        { type: 'action', text: 'Checking package.json for dependencies...' },
+        { type: 'result', text: 'Found: Express 4.18, no auth middleware currently installed' },
+        { type: 'action', text: 'Reading src/routes/index.js to match route patterns...' },
+        { type: 'msg', text: 'I see your project uses Express with middleware-style route organization. I\'ll add JWT auth following the same pattern.' },
+        { type: 'action', text: 'Creating src/middleware/auth.js...' },
+        { type: 'action', text: 'Updating src/routes/index.js with auth middleware...' },
+        { type: 'action', text: 'Adding jsonwebtoken to package.json...' },
+        { type: 'action', text: 'Creating tests/middleware/auth.test.js...' },
+        { type: 'success', text: '✅ All 23 tests passing. JWT authentication added:' },
+        { type: 'msg', text: '- Auth middleware with token verification\n- Login endpoint at POST /api/auth/login\n- Token refresh at POST /api/auth/refresh\n- Protected routes via authMiddleware()\n- Comprehensive test coverage (8 new tests)' },
+      ],
+      'debug-error': [
+        { type: 'action', text: 'Reading src/utils/parser.js...' },
+        { type: 'error', text: 'TypeError: Cannot read properties of undefined (reading \'map\')' },
+        { type: 'action', text: 'Tracing call chain: parser.parse() → data.transform() → output.format()' },
+        { type: 'msg', text: 'Found the issue. In parser.js line 47, the function assumes the input is always an array, but when the API returns null, it tries to call .map() on undefined.' },
+        { type: 'action', text: 'Applying fix to src/utils/parser.js...' },
+        { type: 'msg', text: 'Added null check: if (!data) return []; before the .map() call. This matches the defensive pattern used in other utility files.' },
+        { type: 'action', text: 'Running test suite...' },
+        { type: 'success', text: '✅ All 47 tests passing. Bug fixed.' },
+        { type: 'msg', text: 'Root cause: Missing null validation on API response. Fix: Added defensive check matching project conventions. Also added a test case for null input.' },
+      ],
+      'refactor': [
+        { type: 'action', text: 'Scanning for database query patterns...' },
+        { type: 'result', text: 'Found 14 callback-style queries across 6 files' },
+        { type: 'msg', text: 'I\'ll refactor these to async/await while maintaining the exact same behavior. Let me read the existing patterns first.' },
+        { type: 'action', text: 'Refactoring src/db/users.js (5 queries)...' },
+        { type: 'action', text: 'Refactoring src/db/orders.js (4 queries)...' },
+        { type: 'action', text: 'Refactoring src/db/products.js (3 queries)...' },
+        { type: 'action', text: 'Updating error handling to use try/catch...' },
+        { type: 'action', text: 'Running full test suite...' },
+        { type: 'success', text: '✅ All 89 tests passing. Behavior unchanged.' },
+        { type: 'msg', text: 'Refactored 14 callback-style queries to async/await. Same behavior, cleaner code. Error handling now uses try/catch consistently.' },
+      ],
+      'explain': [
+        { type: 'action', text: 'Scanning project structure...' },
+        { type: 'result', text: 'Found: 47 files, 3 main directories, 2 config files' },
+        { type: 'msg', text: 'This is a Node.js REST API for an e-commerce platform. Here\'s the structure:\n\nsrc/routes/ — API endpoint definitions (Express routers)\nsrc/models/ — Database schemas (MongoDB/Mongoose)\nsrc/controllers/ — Business logic for each route\nsrc/middleware/ — Auth, validation, error handling\nsrc/utils/ — Helper functions and parsers\n\nArchitecture: MVC pattern with middleware pipeline. Auth uses JWT tokens. Database is MongoDB via Mongoose. Tests use Jest with Supertest for HTTP assertions.' },
+      ],
+      'add-tests': [
+        { type: 'action', text: 'Reading src/services/UserService.js...' },
+        { type: 'action', text: 'Checking existing test patterns in tests/ directory...' },
+        { type: 'result', text: 'Project uses Jest with describe/it blocks and expect assertions' },
+        { type: 'msg', text: 'I\'ll add comprehensive tests following your existing Jest patterns.' },
+        { type: 'action', text: 'Creating tests/services/UserService.test.js...' },
+        { type: 'action', text: 'Running new tests...' },
+        { type: 'success', text: '✅ 12 new tests passing (8 unit + 4 integration)' },
+        { type: 'msg', text: 'Added tests for:\n- createUser (valid input, duplicate email, missing fields)\n- getUser (by id, not found)\n- updateUser (valid update, partial update)\n- deleteUser (success, not found)\n- listUsers (pagination, filtering)' },
+      ],
+      'migrate': [
+        { type: 'action', text: 'Reading existing migration files...' },
+        { type: 'action', text: 'Checking database schema patterns...' },
+        { type: 'result', text: 'Project uses numbered migrations with rollback support' },
+        { type: 'action', text: 'Creating migrations/008_create_users_table.sql...' },
+        { type: 'action', text: 'Creating migrations/008_rollback_users_table.sql...' },
+        { type: 'success', text: '✅ Migration created with rollback support' },
+        { type: 'msg', text: 'Created migration 008:\n- users table with id, email, name, role, created_at\n- Unique constraint on email\n- Index on role for query performance\n- Rollback script that drops the table cleanly' },
+      ],
+    };
+
+    function addMessage(content, className) {
+      const msg = document.createElement('div');
+      msg.className = `msg ${className}`;
+      msg.innerHTML = content;
+      terminalBody.appendChild(msg);
+      terminalBody.scrollTop = terminalBody.scrollHeight;
+    }
+
+    function typeMessage(text, className, delay = 0) {
+      return new Promise(resolve => {
+        setTimeout(() => {
+          const msg = document.createElement('div');
+          msg.className = `msg ${className}`;
+          msg.innerHTML = `<span class="typing"></span>`;
+          terminalBody.appendChild(msg);
+          terminalBody.scrollTop = terminalBody.scrollHeight;
+
+          let i = 0;
+          const interval = setInterval(() => {
+            if (i < text.length) {
+              msg.innerHTML = text.substring(0, i + 1) + '<span class="typing"></span>';
+              i++;
+              terminalBody.scrollTop = terminalBody.scrollHeight;
+            } else {
+              msg.innerHTML = text;
+              clearInterval(interval);
+              resolve();
+            }
+          }, 15);
+        }, delay);
+      });
+    }
+
+    async function runExample(key) {
+      const steps = responses[key];
+      if (!steps) return;
+
+      promptInput.value = '';
+      promptInput.disabled = true;
+
+      // Add user message
+      const userText = document.querySelector(`.example-card[onclick="runExample('${key}')"] .example-text`).textContent;
+      addMessage(userText, 'msg-user');
+
+      // Process steps sequentially
+      for (let i = 0; i < steps.length; i++) {
+        const step = steps[i];
+        const delay = i === 0 ? 500 : 300;
+
+        if (step.type === 'action') {
+          await typeMessage(`<div class="qwen-label">ACTION</div>${step.text}`, 'msg-qwen msg-action', delay);
+        } else if (step.type === 'result') {
+          await typeMessage(`<div class="qwen-label">RESULT</div>${step.text}`, 'msg-qwen msg-result', delay);
+        } else if (step.type === 'success') {
+          await typeMessage(`<div class="result">${step.text}</div>`, 'msg-qwen', delay);
+        } else if (step.type === 'error') {
+          await typeMessage(`<div class="error">${step.text}</div>`, 'msg-qwen', delay);
+        } else if (step.type === 'msg') {
+          await typeMessage(step.text, 'msg-qwen', delay);
+        }
+      }
+
+      promptInput.disabled = false;
+      promptInput.focus();
+    }
+
+    // Handle custom input
+    promptInput.addEventListener('keydown', async (e) => {
+      if (e.key === 'Enter' && promptInput.value.trim()) {
+        const text = promptInput.value.trim();
+        promptInput.value = '';
+        promptInput.disabled = true;
+
+        addMessage(text, 'msg-user');
+
+        await typeMessage(`<div class="qwen-label">QWEN</div><span class="typing"></span>`, 'msg-qwen', 500);
+
+        const reply = `I understand your request: "${text}". In the real Qwen Code, I would read your codebase, analyze patterns, implement the change, run tests, and report results. This is a simulated demo — but the workflow is exactly the same. Try one of the example cards above to see a full simulated response!`;
+
+        const msg = terminalBody.lastElementChild;
+        let i = 0;
+        const interval = setInterval(() => {
+          if (i < reply.length) {
+            msg.innerHTML = `<div class="qwen-label">QWEN</div>${reply.substring(0, i + 1)}`;
+            i++;
+            terminalBody.scrollTop = terminalBody.scrollHeight;
+          } else {
+            clearInterval(interval);
+            promptInput.disabled = false;
+            promptInput.focus();
+          }
+        }, 15);
+      }
+    });
+  </script>
+</body>
+</html>
