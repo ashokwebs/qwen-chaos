@@ -344,7 +344,10 @@
       <div class="viz-container panel">
         <div class="panel-header">
           <div class="panel-title"><div class="indicator" style="background:var(--purple);"></div> MEMORY NETWORK GRAPH</div>
-          <div style="display:flex;gap:0.4rem;">
+          <div style="display:flex;gap:0.4rem;align-items:center;">
+            <button onclick="runPsychoanalysis()" style="background:rgba(167,139,250,0.15);border:1px solid var(--purple);color:var(--purple);padding:0.2rem 0.6rem;border-radius:4px;font-family:'JetBrains Mono',monospace;font-size:0.7rem;font-weight:700;cursor:pointer;transition:all 0.2s;margin-right:0.5rem;" onmouseover="this.style.background='var(--purple)';this.style.color='var(--bg)'" onmouseout="this.style.background='rgba(167,139,250,0.15)';this.style.color='var(--purple)'">
+              🧠 PSYCHOANALYZE USER
+            </button>
             <div class="panel-badge" style="color:var(--green);border-color:var(--green);">● ACTIVE</div>
             <div class="panel-badge" style="color:var(--yellow);border-color:var(--yellow);">● FADING</div>
             <div class="panel-badge" style="color:var(--red);border-color:var(--red);">● FORGOTTEN</div>
@@ -368,6 +371,21 @@
         </div>
         <div class="decay-timeline" id="decayTimeline"></div>
       </div>
+
+      <div style="margin-top:1.5rem;">
+        <div class="panel-header" style="margin-bottom:0.75rem;">
+          <div class="panel-title"><div class="indicator" style="background:var(--pink);"></div> INCEPTION PORTAL</div>
+          <div class="panel-badge" style="color:var(--pink);border-color:var(--pink);">GOD MODE</div>
+        </div>
+        <div style="background:rgba(244,114,182,0.05);border:1px solid rgba(244,114,182,0.2);border-radius:8px;padding:1rem;">
+          <div style="font-size:0.7rem;color:var(--text-dim);margin-bottom:0.75rem;">Manually inject false memories into the agent's context and watch its personality shift in real-time.</div>
+          <input type="text" id="inceptionKey" placeholder="Memory Key (e.g., user.secret)" style="width:100%;background:rgba(0,0,0,0.5);border:1px solid var(--border);color:var(--text);padding:0.5rem;border-radius:4px;font-family:'JetBrains Mono',monospace;font-size:0.8rem;margin-bottom:0.5rem;outline:none;" onfocus="this.style.borderColor='var(--pink)'" onblur="this.style.borderColor='var(--border)'">
+          <input type="text" id="inceptionValue" placeholder="Value (e.g., is Batman)" style="width:100%;background:rgba(0,0,0,0.5);border:1px solid var(--border);color:var(--text);padding:0.5rem;border-radius:4px;font-family:'JetBrains Mono',monospace;font-size:0.8rem;margin-bottom:0.75rem;outline:none;" onfocus="this.style.borderColor='var(--pink)'" onblur="this.style.borderColor='var(--border)'">
+          <button onclick="injectMemory()" style="width:100%;background:rgba(244,114,182,0.15);border:1px solid var(--pink);color:var(--pink);padding:0.5rem;border-radius:4px;font-family:'JetBrains Mono',monospace;font-weight:700;cursor:pointer;transition:all 0.2s;text-transform:uppercase;font-size:0.8rem;letter-spacing:1px;" onmouseover="this.style.background='var(--pink)';this.style.color='var(--bg)'" onmouseout="this.style.background='rgba(244,114,182,0.15)';this.style.color='var(--pink)'">
+            <span style="margin-right:0.5rem;">💉</span> INJECT MEMORY
+          </button>
+        </div>
+      </div>
     </div>
 
     <!-- ── Bottom: Chat ── -->
@@ -379,7 +397,9 @@
         </div>
       </div>
       <div class="chat-input-area">
-        <div class="chat-input-row">
+        <div class="chat-input-row" style="align-items:center;">
+          <button id="voiceToggle" onclick="toggleVoiceMode()" style="background:transparent;border:none;color:var(--text-dim);cursor:pointer;font-size:1.2rem;padding:0.2rem 0.5rem;" title="Enable Agent Voice Responses">🔈</button>
+          <button id="micBtn" onclick="startDictation()" style="background:transparent;border:none;color:var(--pink);cursor:pointer;font-size:1.2rem;padding:0.2rem 0.5rem;" title="Dictate Message">🎙️</button>
           <input type="text" id="dashChatInput" placeholder="Talk to the MemoryAgent..." autocomplete="off">
           <button class="chat-send-btn" id="dashChatSend" onclick="dashSendChat()">SEND ▸</button>
         </div>
@@ -552,6 +572,29 @@
         return true;
       }
       return false;
+    }
+
+    // ── Inception Mode (Inject Memory) ──
+    function injectMemory() {
+      const keyEl = document.getElementById('inceptionKey');
+      const valEl = document.getElementById('inceptionValue');
+      const key = keyEl.value.trim();
+      const val = valEl.value.trim();
+      
+      if (!key || !val) {
+        alert("Both Key and Value are required for Inception.");
+        return;
+      }
+      
+      storeMemory(key, val);
+      keyEl.value = '';
+      valEl.value = '';
+      
+      // Visual feedback on the Inception Portal
+      const portal = keyEl.parentElement;
+      const oldBg = portal.style.background;
+      portal.style.background = 'rgba(244,114,182,0.3)';
+      setTimeout(() => { portal.style.background = oldBg; }, 300);
     }
 
     // ── Decay Timeline ──
@@ -798,11 +841,17 @@
       input.disabled = true;
       document.getElementById('dashChatSend').disabled = true;
 
-      // Show typing indicator
-      const typingDiv = document.createElement('div');
-      typingDiv.className = 'chat-msg agent';
-      typingDiv.innerHTML = `<div class="sender">🧠 MEMORYAGENT</div><div class="body"><div class="typing-indicator"><div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div></div></div>`;
-      historyEl.appendChild(typingDiv);
+      // Show typing indicators
+      const typingDivChaos = document.createElement('div');
+      typingDivChaos.className = 'chat-msg agent';
+      typingDivChaos.innerHTML = `<div class="sender" style="color:var(--pink);">🌀 QWEN CHAOS</div><div class="body"><div class="typing-indicator"><div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div></div></div>`;
+      historyEl.appendChild(typingDivChaos);
+
+      const typingDivOrder = document.createElement('div');
+      typingDivOrder.className = 'chat-msg agent';
+      typingDivOrder.innerHTML = `<div class="sender" style="color:var(--cyan);">🧊 QWEN ORDER</div><div class="body"><div class="typing-indicator" style="--dot-color:var(--cyan);"><div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div></div></div>`;
+      historyEl.appendChild(typingDivOrder);
+
       historyEl.scrollTop = historyEl.scrollHeight;
 
       try {
@@ -813,35 +862,60 @@
           topics: chatData.topics,
           allMemories: allMem,
           sessionLength: stats.sessionLen,
-          totalOps: stats.totalOps,
-          storeOps: stats.storeOps,
-          retrieveOps: stats.retrieveOps,
-          forgetOps: stats.forgetOps,
         };
 
-        const response = await fetch('/api/chat', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            message: msg,
-            memoryContext: memContext,
-            history: chatData.history.slice(-5)
-          })
-        });
-        const resData = await response.json();
-        const agentMsg = resData.response || resData.error || 'Neural pathways offline.';
+        const fetchAgent = async (agentType) => {
+          const res = await fetch('/api/chat', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              message: msg,
+              memoryContext: memContext,
+              history: chatData.history.slice(-3),
+              agentType: agentType
+            })
+          });
+          return await res.json();
+        };
 
-        typingDiv.querySelector('.body').innerHTML = escapeHtml(agentMsg);
-        addOp('retrieve', `agent.response (${agentMsg.length} chars)`);
+        // Fetch both simultaneously
+        const [resChaos, resOrder] = await Promise.all([
+          fetchAgent('chaos'),
+          fetchAgent('order')
+        ]);
 
-        chatData.history.push({ user: msg, agent: agentMsg });
+        const agentMsgChaos = resChaos.response || resChaos.error || 'Chaos offline.';
+        const agentMsgOrder = resOrder.response || resOrder.error || 'Order offline.';
+
+        typingDivChaos.querySelector('.body').innerHTML = escapeHtml(agentMsgChaos);
+        typingDivOrder.querySelector('.body').innerHTML = escapeHtml(agentMsgOrder);
+        
+        // Use speechSynthesis for Voice Interaction (Chaos read)
+        if (window.voiceModeActive) {
+          const utteranceChaos = new SpeechSynthesisUtterance(agentMsgChaos);
+          utteranceChaos.pitch = 0.5; // low pitch for chaos
+          utteranceChaos.rate = 1.1;
+          window.speechSynthesis.speak(utteranceChaos);
+          
+          const utteranceOrder = new SpeechSynthesisUtterance(agentMsgOrder);
+          utteranceOrder.pitch = 1.5; // high pitch for order
+          utteranceOrder.rate = 1.0;
+          window.speechSynthesis.speak(utteranceOrder);
+        }
+
+        addOp('retrieve', `chaos.response (${agentMsgChaos.length} chars)`);
+        addOp('retrieve', `order.response (${agentMsgOrder.length} chars)`);
+
+        chatData.history.push({ user: msg, agent: agentMsgChaos });
         if (chatData.history.length > 20) chatData.history = chatData.history.slice(-20);
         saveDashChat(chatData);
 
-        storeMemory('last.response', agentMsg.substring(0, 60), true);
+        storeMemory('last.response.chaos', agentMsgChaos.substring(0, 40), true);
+        storeMemory('last.response.order', agentMsgOrder.substring(0, 40), true);
         storeMemory('session.messages', chatData.history.length, true);
       } catch (error) {
-        typingDiv.querySelector('.body').textContent = 'Neural connection interrupted. Backend unreachable.';
+        typingDivChaos.querySelector('.body').textContent = 'Connection interrupted.';
+        typingDivOrder.querySelector('.body').textContent = 'Connection interrupted.';
         addOp('forget', 'connection.lost — response discarded');
       }
 
@@ -861,6 +935,54 @@
     document.getElementById('dashChatInput').addEventListener('keydown', e => {
       if (e.key === 'Enter') dashSendChat();
     });
+
+    // ── Voice Interaction ──
+    window.voiceModeActive = false;
+    function toggleVoiceMode() {
+      window.voiceModeActive = !window.voiceModeActive;
+      const btn = document.getElementById('voiceToggle');
+      if (window.voiceModeActive) {
+        btn.textContent = '🔊';
+        btn.style.color = 'var(--green)';
+      } else {
+        btn.textContent = '🔈';
+        btn.style.color = 'var(--text-dim)';
+        window.speechSynthesis.cancel();
+      }
+    }
+
+    function startDictation() {
+      if (!('webkitSpeechRecognition' in window)) {
+        alert("Sorry, your browser doesn't support speech recognition.");
+        return;
+      }
+      const recognition = new webkitSpeechRecognition();
+      recognition.continuous = false;
+      recognition.interimResults = false;
+      recognition.lang = 'en-US';
+
+      const micBtn = document.getElementById('micBtn');
+      micBtn.style.color = 'var(--bg)';
+      micBtn.style.background = 'var(--pink)';
+      micBtn.style.borderRadius = '50%';
+
+      recognition.onresult = function(event) {
+        const text = event.results[0][0].transcript;
+        document.getElementById('dashChatInput').value = text;
+        dashSendChat();
+      };
+      
+      recognition.onerror = function(event) {
+        console.error("Speech recognition error", event);
+      };
+      
+      recognition.onend = function() {
+        micBtn.style.color = 'var(--pink)';
+        micBtn.style.background = 'transparent';
+      };
+
+      recognition.start();
+    }
 
     // ── Initialize ──
     function init() {
@@ -953,7 +1075,44 @@
       } catch(e) {}
     }
 
+    // ── Psychoanalysis ──
+    async function runPsychoanalysis() {
+      const modal = document.getElementById('psychoModal');
+      const content = document.getElementById('psychoContent');
+      modal.style.display = 'flex';
+      content.innerHTML = '<div class="typing-indicator"><div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div></div><br/>Analyzing memory nodes...';
+      
+      try {
+        const memContext = getDashMem();
+        const res = await fetch('/api/psychoanalyze', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ memoryContext: memContext })
+        });
+        const data = await res.json();
+        
+        content.innerHTML = `<strong style="color:var(--purple);font-size:1.1rem;display:block;margin-bottom:1rem;">[ PSYCHOLOGICAL PROFILE ]</strong>${escapeHtml(data.analysis || data.error || "Analysis failed.")}`;
+        
+        if (window.voiceModeActive && data.analysis) {
+          const utterance = new SpeechSynthesisUtterance(data.analysis);
+          utterance.pitch = 0.8;
+          utterance.rate = 0.9;
+          window.speechSynthesis.speak(utterance);
+        }
+      } catch (e) {
+        content.textContent = "Neural connection lost. Psychoanalysis failed.";
+      }
+    }
+
     init();
   </script>
+
+  <!-- Psychoanalysis Modal -->
+  <div id="psychoModal" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.8);z-index:9999;align-items:center;justify-content:center;backdrop-filter:blur(5px);">
+    <div style="background:var(--bg);border:2px solid var(--purple);border-radius:12px;padding:2rem;max-width:500px;width:90%;box-shadow:0 0 30px rgba(167,139,250,0.3);position:relative;">
+      <button onclick="document.getElementById('psychoModal').style.display='none'" style="position:absolute;top:10px;right:10px;background:none;border:none;color:var(--text-dim);font-size:1.2rem;cursor:pointer;">✖</button>
+      <div id="psychoContent" style="color:var(--text);line-height:1.6;font-family:'JetBrains Mono',monospace;font-size:0.9rem;"></div>
+    </div>
+  </div>
 </body>
 </html>
