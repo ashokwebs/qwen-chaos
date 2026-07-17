@@ -2,8 +2,8 @@
   "name": "qwen",
   "version": "1.0.0",
   "description": "> Track 1: MemoryAgent | Global AI Hackathon with Qwen Cloud | $70K+ in prizes",
-  "main": "index.js",
   "scripts": {
+    "start": "node local-dev.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
