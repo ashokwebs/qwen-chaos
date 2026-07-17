@@ -1,0 +1,26 @@
+{
+  "name": "qwen",
+  "version": "1.0.0",
+  "description": "> Track 1: MemoryAgent | Global AI Hackathon with Qwen Cloud | $70K+ in prizes",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ashokwebs/qwen-chaos.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/ashokwebs/qwen-chaos/issues"
+  },
+  "homepage": "https://github.com/ashokwebs/qwen-chaos#readme",
+  "dependencies": {
+    "cors": "^2.8.6",
+    "dotenv": "^17.4.2",
+    "express": "^5.2.1",
+    "openai": "^6.48.0"
+  }
+}

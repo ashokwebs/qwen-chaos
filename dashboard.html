@@ -1,0 +1,959 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Memory Operations Center — Qwen Chaos | Real-Time Agent Memory Dashboard</title>
+  <meta name="description" content="Live memory operations dashboard for Qwen Chaos MemoryAgent. Watch memory store, retrieve, forget, and recall operations in real-time with interactive visualizations.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+    :root {
+      --bg: #06060a; --bg-card: #0c0c14; --bg-card-hover: #12121e;
+      --text: #e8e8f0; --text-dim: #7a7a95; --text-ghost: #44445a;
+      --purple: #a78bfa; --pink: #f472b6; --cyan: #22d3ee; --yellow: #fbbf24;
+      --red: #f87171; --orange: #fb923c; --green: #4ade80; --blue: #60a5fa;
+      --emerald: #34d399;
+      --gradient-mem: linear-gradient(135deg, #a78bfa 0%, #22d3ee 50%, #4ade80 100%);
+      --glow-cyan: 0 0 20px rgba(34,211,238,0.3), 0 0 60px rgba(34,211,238,0.1);
+      --glow-purple: 0 0 20px rgba(167,139,250,0.3), 0 0 60px rgba(167,139,250,0.1);
+      --glow-green: 0 0 20px rgba(74,222,128,0.3), 0 0 60px rgba(74,222,128,0.1);
+    }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: 'JetBrains Mono', monospace;
+      background: var(--bg); color: var(--text);
+      line-height: 1.6; overflow-x: hidden;
+    }
+    a { color: var(--cyan); text-decoration: none; }
+    a:hover { color: var(--pink); }
+
+    /* ── Ambient Background ── */
+    .ambient-bg {
+      position: fixed; inset: 0; z-index: 0; pointer-events: none;
+      background:
+        radial-gradient(ellipse 600px 400px at 20% 30%, rgba(167,139,250,0.06) 0%, transparent 70%),
+        radial-gradient(ellipse 500px 500px at 80% 60%, rgba(34,211,238,0.04) 0%, transparent 70%),
+        radial-gradient(ellipse 400px 300px at 50% 90%, rgba(74,222,128,0.03) 0%, transparent 70%);
+      animation: ambientShift 20s ease-in-out infinite alternate;
+    }
+    @keyframes ambientShift {
+      0% { opacity: 0.6; } 50% { opacity: 1; } 100% { opacity: 0.7; }
+    }
+
+    /* ── Scan Line Effect ── */
+    .scanlines {
+      position: fixed; inset: 0; z-index: 0; pointer-events: none;
+      background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.03) 2px, rgba(0,0,0,0.03) 4px);
+    }
+
+    /* ── Top Bar ── */
+    .top-bar {
+      position: sticky; top: 0; z-index: 100;
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 0.6rem 1.5rem;
+      background: rgba(6,6,10,0.92); backdrop-filter: blur(16px);
+      border-bottom: 1px solid rgba(34,211,238,0.08);
+    }
+    .top-bar .left { display: flex; align-items: center; gap: 1rem; }
+    .top-bar .dots { display: flex; gap: 5px; }
+    .top-bar .dot { width: 9px; height: 9px; border-radius: 50%; }
+    .dot-r { background: #f87171; } .dot-y { background: #fbbf24; } .dot-g { background: #4ade80; }
+    .top-bar .title {
+      font-size: 0.65rem; letter-spacing: 2px; color: var(--text-ghost);
+      text-transform: uppercase;
+    }
+    .top-bar .title span { color: var(--cyan); font-weight: 700; }
+    .top-bar .right { display: flex; gap: 1rem; font-size: 0.6rem; color: var(--text-ghost); }
+    .top-bar .right .live { color: var(--green); animation: blink 1.5s infinite; }
+    @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+    .back-link {
+      font-size: 0.65rem; padding: 0.3rem 0.7rem; border-radius: 6px;
+      border: 1px solid rgba(34,211,238,0.15); color: var(--cyan);
+      transition: all 0.2s;
+    }
+    .back-link:hover { background: rgba(34,211,238,0.1); color: var(--text); text-decoration: none; }
+
+    /* ── Layout ── */
+    .dashboard {
+      position: relative; z-index: 1;
+      display: grid; grid-template-columns: 280px 1fr 300px;
+      grid-template-rows: auto 1fr;
+      gap: 1px; min-height: calc(100vh - 40px);
+      background: rgba(34,211,238,0.03);
+    }
+    @media (max-width: 1100px) {
+      .dashboard { grid-template-columns: 1fr; }
+    }
+
+    /* ── Panels ── */
+    .panel {
+      background: var(--bg); padding: 1.2rem;
+      border: 1px solid rgba(34,211,238,0.04);
+    }
+    .panel-header {
+      display: flex; justify-content: space-between; align-items: center;
+      margin-bottom: 1rem; padding-bottom: 0.6rem;
+      border-bottom: 1px solid rgba(34,211,238,0.06);
+    }
+    .panel-title {
+      font-size: 0.6rem; letter-spacing: 2px; color: var(--text-ghost);
+      text-transform: uppercase; display: flex; align-items: center; gap: 0.4rem;
+    }
+    .panel-title .indicator {
+      width: 6px; height: 6px; border-radius: 50%; background: var(--green);
+      animation: blink 2s infinite;
+    }
+    .panel-badge {
+      font-size: 0.5rem; padding: 0.15rem 0.5rem; border-radius: 4px;
+      border: 1px solid; letter-spacing: 1px;
+    }
+
+    /* ── Memory Operations Feed ── */
+    .ops-feed { max-height: 70vh; overflow-y: auto; }
+    .ops-feed::-webkit-scrollbar { width: 3px; }
+    .ops-feed::-webkit-scrollbar-thumb { background: var(--text-ghost); border-radius: 3px; }
+    .op-item {
+      display: flex; gap: 0.6rem; padding: 0.6rem 0.5rem;
+      border-bottom: 1px solid rgba(255,255,255,0.02);
+      animation: opSlideIn 0.3s ease-out;
+      transition: background 0.2s;
+    }
+    .op-item:hover { background: var(--bg-card-hover); }
+    @keyframes opSlideIn { from { opacity: 0; transform: translateX(-10px); } to { opacity: 1; transform: translateX(0); } }
+    .op-icon {
+      width: 28px; height: 28px; border-radius: 6px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.7rem; flex-shrink: 0;
+    }
+    .op-icon.store { background: rgba(74,222,128,0.12); color: var(--green); }
+    .op-icon.retrieve { background: rgba(34,211,238,0.12); color: var(--cyan); }
+    .op-icon.forget { background: rgba(248,113,113,0.12); color: var(--red); }
+    .op-icon.recall { background: rgba(167,139,250,0.12); color: var(--purple); }
+    .op-icon.connect { background: rgba(251,191,36,0.12); color: var(--yellow); }
+    .op-content { flex: 1; min-width: 0; }
+    .op-type { font-size: 0.55rem; letter-spacing: 1px; font-weight: 700; }
+    .op-type.store { color: var(--green); } .op-type.retrieve { color: var(--cyan); }
+    .op-type.forget { color: var(--red); } .op-type.recall { color: var(--purple); }
+    .op-type.connect { color: var(--yellow); }
+    .op-desc { font-size: 0.65rem; color: var(--text-dim); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .op-time { font-size: 0.5rem; color: var(--text-ghost); }
+
+    /* ── Center: Main Viz ── */
+    .center-panel { grid-column: 2; display: flex; flex-direction: column; gap: 1px; }
+    .viz-container { flex: 1; position: relative; min-height: 400px; }
+    #memoryGraph { width: 100%; height: 100%; display: block; background: transparent; }
+
+    /* ── Stats Bar ── */
+    .stats-strip {
+      display: grid; grid-template-columns: repeat(6, 1fr);
+      gap: 1px; background: rgba(34,211,238,0.03);
+    }
+    .stat-cell {
+      background: var(--bg); padding: 0.8rem; text-align: center;
+      transition: all 0.3s;
+    }
+    .stat-cell:hover { background: var(--bg-card); }
+    .stat-val {
+      font-size: 1.4rem; font-weight: 700;
+      background: var(--gradient-mem); -webkit-background-clip: text;
+      background-clip: text; -webkit-text-fill-color: transparent;
+    }
+    .stat-label { font-size: 0.5rem; color: var(--text-ghost); letter-spacing: 1px; margin-top: 0.2rem; }
+
+    /* ── Right Panel: Memory Inspector ── */
+    .memory-inspector { display: flex; flex-direction: column; gap: 1rem; }
+    .mem-slot {
+      background: var(--bg-card); border-radius: 8px; padding: 0.8rem;
+      border: 1px solid rgba(34,211,238,0.06);
+      transition: all 0.3s; cursor: pointer;
+    }
+    .mem-slot:hover {
+      border-color: rgba(34,211,238,0.2);
+      box-shadow: 0 4px 20px rgba(34,211,238,0.05);
+      transform: translateY(-1px);
+    }
+    .mem-slot .slot-header {
+      display: flex; justify-content: space-between; align-items: center;
+      margin-bottom: 0.4rem;
+    }
+    .mem-slot .slot-key { font-size: 0.6rem; color: var(--cyan); font-weight: 600; }
+    .mem-slot .slot-age { font-size: 0.5rem; color: var(--text-ghost); }
+    .mem-slot .slot-value { font-size: 0.6rem; color: var(--text-dim); line-height: 1.5; }
+    .mem-slot .slot-meta {
+      display: flex; gap: 0.5rem; margin-top: 0.4rem; font-size: 0.45rem; color: var(--text-ghost);
+    }
+    .mem-slot .decay-bar {
+      height: 3px; border-radius: 2px; background: rgba(255,255,255,0.05);
+      margin-top: 0.4rem; overflow: hidden;
+    }
+    .mem-slot .decay-fill {
+      height: 100%; border-radius: 2px; transition: width 1s ease-out;
+    }
+    .decay-fresh { background: var(--green); }
+    .decay-warm { background: var(--yellow); }
+    .decay-stale { background: var(--orange); }
+    .decay-dying { background: var(--red); }
+
+    /* ── Chat Panel (Bottom) ── */
+    .chat-panel {
+      grid-column: 1 / -1; background: var(--bg);
+      border-top: 1px solid rgba(34,211,238,0.08);
+      padding: 1rem 1.5rem; display: flex; gap: 1rem; align-items: flex-start;
+    }
+    .chat-history {
+      flex: 1; max-height: 200px; overflow-y: auto; font-size: 0.7rem;
+      padding-right: 0.5rem;
+    }
+    .chat-history::-webkit-scrollbar { width: 3px; }
+    .chat-history::-webkit-scrollbar-thumb { background: var(--text-ghost); border-radius: 3px; }
+    .chat-msg { margin-bottom: 0.5rem; animation: opSlideIn 0.3s ease-out; }
+    .chat-msg.user { color: var(--cyan); }
+    .chat-msg.agent { color: var(--green); }
+    .chat-msg .sender { font-weight: 700; font-size: 0.55rem; letter-spacing: 1px; }
+    .chat-msg .body { margin-top: 2px; color: var(--text-dim); line-height: 1.6; }
+    .chat-input-area {
+      width: 350px; display: flex; flex-direction: column; gap: 0.5rem;
+    }
+    .chat-input-row { display: flex; gap: 0.5rem; }
+    .chat-input-row input {
+      flex: 1; background: var(--bg-card); border: 1px solid rgba(34,211,238,0.1);
+      border-radius: 8px; padding: 0.6rem 0.8rem; color: var(--text);
+      font-family: 'JetBrains Mono', monospace; font-size: 0.7rem;
+      outline: none; transition: border-color 0.2s;
+    }
+    .chat-input-row input:focus { border-color: rgba(34,211,238,0.3); }
+    .chat-input-row input::placeholder { color: var(--text-ghost); }
+    .chat-send-btn {
+      padding: 0.6rem 1rem; border-radius: 8px; border: 1px solid rgba(74,222,128,0.2);
+      background: rgba(74,222,128,0.08); color: var(--green);
+      font-family: 'JetBrains Mono', monospace; font-size: 0.65rem;
+      cursor: pointer; transition: all 0.2s; font-weight: 600;
+    }
+    .chat-send-btn:hover { background: rgba(74,222,128,0.15); }
+    .chat-send-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+    .chat-hint { font-size: 0.5rem; color: var(--text-ghost); }
+
+    /* ── Memory Decay Timeline ── */
+    .decay-timeline { margin-top: 0.5rem; }
+    .decay-entry {
+      display: flex; align-items: center; gap: 0.5rem; padding: 0.35rem 0;
+      font-size: 0.55rem; color: var(--text-dim);
+      border-left: 2px solid var(--text-ghost); padding-left: 0.6rem;
+      margin-left: 0.3rem;
+    }
+    .decay-entry.active { border-left-color: var(--green); }
+    .decay-entry.fading { border-left-color: var(--yellow); }
+    .decay-entry.forgotten { border-left-color: var(--red); opacity: 0.4; text-decoration: line-through; }
+
+    /* ── Typing indicator ── */
+    .typing-indicator { display: inline-flex; gap: 3px; align-items: center; padding: 0.3rem 0; }
+    .typing-dot {
+      width: 5px; height: 5px; border-radius: 50%; background: var(--green);
+      animation: typingBounce 1.2s infinite;
+    }
+    .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+    .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+    @keyframes typingBounce {
+      0%, 60%, 100% { transform: translateY(0); opacity: 0.4; }
+      30% { transform: translateY(-4px); opacity: 1; }
+    }
+
+    /* ── Glow Pulse for important elements ── */
+    @keyframes glowPulse {
+      0%, 100% { box-shadow: 0 0 5px rgba(34,211,238,0.1); }
+      50% { box-shadow: 0 0 20px rgba(34,211,238,0.2), 0 0 40px rgba(34,211,238,0.05); }
+    }
+
+    /* ── Number Counter Animation ── */
+    @keyframes countUp { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+    .count-animate { animation: countUp 0.5s ease-out; }
+
+    /* ── Responsive ── */
+    @media (max-width: 1100px) {
+      .dashboard { grid-template-columns: 1fr; }
+      .center-panel { grid-column: 1; }
+      .chat-panel { grid-column: 1; flex-direction: column; }
+      .chat-input-area { width: 100%; }
+      .stats-strip { grid-template-columns: repeat(3, 1fr); }
+    }
+  </style>
+</head>
+<body>
+  <div class="ambient-bg"></div>
+  <div class="scanlines"></div>
+
+  <!-- ── Top Bar ── -->
+  <div class="top-bar">
+    <div class="left">
+      <div class="dots"><div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div></div>
+      <div class="title"><span>QWEN::CHAOS</span> — MEMORY OPERATIONS CENTER</div>
+    </div>
+    <div class="right">
+      <span class="live">● LIVE</span>
+      <span id="opsCounter">OPS: 0</span>
+      <span id="uptimeDisplay">UPTIME: 00:00:00</span>
+      <a href="index.html" class="back-link">← BACK TO CHAOS</a>
+    </div>
+  </div>
+
+  <!-- ── Dashboard Grid ── -->
+  <div class="dashboard">
+
+    <!-- ── Left: Operations Feed ── -->
+    <div class="panel">
+      <div class="panel-header">
+        <div class="panel-title"><div class="indicator"></div> MEMORY OPS FEED</div>
+        <div class="panel-badge" style="color:var(--green);border-color:var(--green);">LIVE</div>
+      </div>
+      <div class="ops-feed" id="opsFeed"></div>
+    </div>
+
+    <!-- ── Center ── -->
+    <div class="center-panel">
+      <!-- Stats Strip -->
+      <div class="stats-strip">
+        <div class="stat-cell">
+          <div class="stat-val" id="statTotalMem">0</div>
+          <div class="stat-label">MEMORIES</div>
+        </div>
+        <div class="stat-cell">
+          <div class="stat-val" id="statStoreOps">0</div>
+          <div class="stat-label">STORE OPS</div>
+        </div>
+        <div class="stat-cell">
+          <div class="stat-val" id="statRetrieveOps">0</div>
+          <div class="stat-label">RETRIEVE OPS</div>
+        </div>
+        <div class="stat-cell">
+          <div class="stat-val" id="statForgetOps">0</div>
+          <div class="stat-label">FORGET OPS</div>
+        </div>
+        <div class="stat-cell">
+          <div class="stat-val" id="statRecallRate">100%</div>
+          <div class="stat-label">RECALL RATE</div>
+        </div>
+        <div class="stat-cell">
+          <div class="stat-val" id="statSessionLen">0</div>
+          <div class="stat-label">SESSION LEN</div>
+        </div>
+      </div>
+
+      <!-- Memory Network Viz -->
+      <div class="viz-container panel">
+        <div class="panel-header">
+          <div class="panel-title"><div class="indicator" style="background:var(--purple);"></div> MEMORY NETWORK GRAPH</div>
+          <div style="display:flex;gap:0.4rem;">
+            <div class="panel-badge" style="color:var(--green);border-color:var(--green);">● ACTIVE</div>
+            <div class="panel-badge" style="color:var(--yellow);border-color:var(--yellow);">● FADING</div>
+            <div class="panel-badge" style="color:var(--red);border-color:var(--red);">● FORGOTTEN</div>
+          </div>
+        </div>
+        <canvas id="memoryGraph"></canvas>
+      </div>
+    </div>
+
+    <!-- ── Right: Memory Inspector ── -->
+    <div class="panel">
+      <div class="panel-header">
+        <div class="panel-title"><div class="indicator" style="background:var(--cyan);"></div> MEMORY INSPECTOR</div>
+        <div class="panel-badge" style="color:var(--cyan);border-color:var(--cyan);" id="memCount">0 SLOTS</div>
+      </div>
+      <div class="memory-inspector" id="memInspector"></div>
+
+      <div style="margin-top:1.5rem;">
+        <div class="panel-header">
+          <div class="panel-title"><div class="indicator" style="background:var(--orange);"></div> DECAY TIMELINE</div>
+        </div>
+        <div class="decay-timeline" id="decayTimeline"></div>
+      </div>
+    </div>
+
+    <!-- ── Bottom: Chat ── -->
+    <div class="chat-panel">
+      <div class="chat-history" id="dashChatHistory">
+        <div class="chat-msg agent">
+          <div class="sender">🧠 MEMORYAGENT</div>
+          <div class="body">Memory Operations Center online. I'm tracking every interaction, storing what matters, and forgetting what doesn't. Talk to me — every word becomes a memory operation you can watch in real-time on the left panel.</div>
+        </div>
+      </div>
+      <div class="chat-input-area">
+        <div class="chat-input-row">
+          <input type="text" id="dashChatInput" placeholder="Talk to the MemoryAgent..." autocomplete="off">
+          <button class="chat-send-btn" id="dashChatSend" onclick="dashSendChat()">SEND ▸</button>
+        </div>
+        <div class="chat-hint">Try: "My name is ___" • "What do you remember?" • "Forget my name" • "How's your memory?"</div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ── Uptime Counter ──
+    const startTime = Date.now();
+    function updateUptime() {
+      const elapsed = Math.floor((Date.now() - startTime) / 1000);
+      const h = String(Math.floor(elapsed / 3600)).padStart(2, '0');
+      const m = String(Math.floor((elapsed % 3600) / 60)).padStart(2, '0');
+      const s = String(elapsed % 60).padStart(2, '0');
+      document.getElementById('uptimeDisplay').textContent = `UPTIME: ${h}:${m}:${s}`;
+    }
+    setInterval(updateUptime, 1000);
+
+    // ── Stats Tracking ──
+    const stats = { totalMem: 0, storeOps: 0, retrieveOps: 0, forgetOps: 0, recallOps: 0, totalOps: 0, sessionLen: 0 };
+
+    function updateStats() {
+      document.getElementById('statTotalMem').textContent = stats.totalMem;
+      document.getElementById('statStoreOps').textContent = stats.storeOps;
+      document.getElementById('statRetrieveOps').textContent = stats.retrieveOps;
+      document.getElementById('statForgetOps').textContent = stats.forgetOps;
+      const rate = stats.recallOps > 0 ? Math.round((stats.recallOps / (stats.recallOps + stats.forgetOps)) * 100) : 100;
+      document.getElementById('statRecallRate').textContent = rate + '%';
+      document.getElementById('statSessionLen').textContent = stats.sessionLen;
+      document.getElementById('opsCounter').textContent = `OPS: ${stats.totalOps}`;
+    }
+
+    // ── Memory Store ──
+    const DASH_MEM_KEY = 'qwen_dashboard_mem';
+    const DASH_CHAT_KEY = 'qwen_dashboard_chat';
+
+    function getDashMem() {
+      try { return JSON.parse(localStorage.getItem(DASH_MEM_KEY)) || {}; }
+      catch { return {}; }
+    }
+    function saveDashMem(mem) { localStorage.setItem(DASH_MEM_KEY, JSON.stringify(mem)); }
+
+    function getDashChat() {
+      try { return JSON.parse(localStorage.getItem(DASH_CHAT_KEY)) || { userName: null, history: [], topics: [] }; }
+      catch { return { userName: null, history: [], topics: [] }; }
+    }
+    function saveDashChat(data) { localStorage.setItem(DASH_CHAT_KEY, JSON.stringify(data)); }
+
+    // ── Operations Feed ──
+    const opTypes = {
+      store: { icon: '💾', label: 'STORE', class: 'store' },
+      retrieve: { icon: '🔍', label: 'RETRIEVE', class: 'retrieve' },
+      forget: { icon: '🗑️', label: 'FORGET', class: 'forget' },
+      recall: { icon: '🧠', label: 'RECALL', class: 'recall' },
+      connect: { icon: '🔗', label: 'CONNECT', class: 'connect' },
+    };
+
+    function addOp(type, description) {
+      const feed = document.getElementById('opsFeed');
+      const op = opTypes[type];
+      const now = new Date();
+      const time = now.toLocaleTimeString('en-US', { hour12: false });
+
+      const item = document.createElement('div');
+      item.className = 'op-item';
+      item.innerHTML = `
+        <div class="op-icon ${op.class}">${op.icon}</div>
+        <div class="op-content">
+          <div class="op-type ${op.class}">${op.label}</div>
+          <div class="op-desc">${description}</div>
+        </div>
+        <div class="op-time">${time}</div>
+      `;
+      feed.insertBefore(item, feed.firstChild);
+
+      // Keep only last 50 ops
+      while (feed.children.length > 50) feed.removeChild(feed.lastChild);
+
+      stats.totalOps++;
+      if (type === 'store') stats.storeOps++;
+      if (type === 'retrieve') stats.retrieveOps++;
+      if (type === 'forget') stats.forgetOps++;
+      if (type === 'recall') stats.recallOps++;
+
+      updateStats();
+    }
+
+    // ── Memory Inspector ──
+    function updateMemInspector() {
+      const mem = getDashMem();
+      const inspector = document.getElementById('memInspector');
+      const keys = Object.keys(mem);
+      document.getElementById('memCount').textContent = `${keys.length} SLOTS`;
+      stats.totalMem = keys.length;
+
+      inspector.innerHTML = '';
+      keys.forEach(key => {
+        const entry = mem[key];
+        const age = Date.now() - (entry.stored || Date.now());
+        const ageStr = age < 60000 ? `${Math.floor(age/1000)}s ago` : age < 3600000 ? `${Math.floor(age/60000)}m ago` : `${Math.floor(age/3600000)}h ago`;
+
+        // Decay based on access frequency and age
+        const decay = Math.max(0, 100 - (age / 600000) * 10); // 10% per 10min
+        const decayClass = decay > 75 ? 'decay-fresh' : decay > 50 ? 'decay-warm' : decay > 25 ? 'decay-stale' : 'decay-dying';
+
+        const slot = document.createElement('div');
+        slot.className = 'mem-slot';
+        slot.innerHTML = `
+          <div class="slot-header">
+            <div class="slot-key">${key}</div>
+            <div class="slot-age">${ageStr}</div>
+          </div>
+          <div class="slot-value">${typeof entry.value === 'object' ? JSON.stringify(entry.value).substring(0, 80) : String(entry.value).substring(0, 80)}</div>
+          <div class="slot-meta">
+            <span>Reads: ${entry.reads || 0}</span>
+            <span>Writes: ${entry.writes || 0}</span>
+            <span>Strength: ${Math.round(decay)}%</span>
+          </div>
+          <div class="decay-bar"><div class="decay-fill ${decayClass}" style="width:${decay}%"></div></div>
+        `;
+        inspector.appendChild(slot);
+      });
+      updateStats();
+    }
+
+    // ── Store a Memory ──
+    function storeMemory(key, value, silent) {
+      const mem = getDashMem();
+      const isNew = !mem[key];
+      mem[key] = {
+        value: value,
+        stored: mem[key]?.stored || Date.now(),
+        updated: Date.now(),
+        reads: mem[key]?.reads || 0,
+        writes: (mem[key]?.writes || 0) + 1,
+      };
+      saveDashMem(mem);
+      if (!silent) addOp('store', `${key} = "${String(value).substring(0, 40)}"`);
+      updateMemInspector();
+      addGraphNode(key, value);
+      return isNew;
+    }
+
+    // ── Retrieve a Memory ──
+    function retrieveMemory(key) {
+      const mem = getDashMem();
+      if (mem[key]) {
+        mem[key].reads = (mem[key].reads || 0) + 1;
+        saveDashMem(mem);
+        addOp('retrieve', `${key} → "${String(mem[key].value).substring(0, 40)}"`);
+        updateMemInspector();
+        return mem[key].value;
+      }
+      addOp('retrieve', `${key} → NOT FOUND`);
+      return null;
+    }
+
+    // ── Forget a Memory ──
+    function forgetMemory(key) {
+      const mem = getDashMem();
+      if (mem[key]) {
+        const val = mem[key].value;
+        delete mem[key];
+        saveDashMem(mem);
+        addOp('forget', `${key} (was: "${String(val).substring(0, 30)}")`);
+        addDecayEntry(key, 'forgotten');
+        updateMemInspector();
+        return true;
+      }
+      return false;
+    }
+
+    // ── Decay Timeline ──
+    const decayEntries = [];
+    function addDecayEntry(key, state) {
+      decayEntries.unshift({ key, state, time: Date.now() });
+      if (decayEntries.length > 15) decayEntries.pop();
+      renderDecayTimeline();
+    }
+    function renderDecayTimeline() {
+      const el = document.getElementById('decayTimeline');
+      el.innerHTML = decayEntries.map(e => {
+        const ago = Math.floor((Date.now() - e.time) / 1000);
+        const agoStr = ago < 60 ? `${ago}s` : `${Math.floor(ago/60)}m`;
+        return `<div class="decay-entry ${e.state}"><span>${e.key}</span><span style="margin-left:auto;font-size:0.45rem;">${agoStr}</span></div>`;
+      }).join('');
+    }
+
+    // ── Memory Network Graph (Canvas) ──
+    const graphNodes = [];
+    const graphEdges = [];
+    let graphCanvas, graphCtx;
+
+    function initGraph() {
+      graphCanvas = document.getElementById('memoryGraph');
+      graphCtx = graphCanvas.getContext('2d');
+      resizeGraph();
+      window.addEventListener('resize', resizeGraph);
+      animateGraph();
+    }
+
+    function resizeGraph() {
+      const rect = graphCanvas.parentElement.getBoundingClientRect();
+      graphCanvas.width = rect.width;
+      graphCanvas.height = rect.height - 50;
+    }
+
+    function addGraphNode(key, value) {
+      const existing = graphNodes.find(n => n.key === key);
+      if (existing) {
+        existing.pulseTime = Date.now();
+        existing.value = value;
+        return;
+      }
+
+      const cx = graphCanvas.width / 2;
+      const cy = graphCanvas.height / 2;
+      const angle = Math.random() * Math.PI * 2;
+      const dist = 80 + Math.random() * 150;
+
+      const node = {
+        key, value,
+        x: cx + Math.cos(angle) * dist,
+        y: cy + Math.sin(angle) * dist,
+        vx: (Math.random() - 0.5) * 0.3,
+        vy: (Math.random() - 0.5) * 0.3,
+        radius: 18 + Math.min(String(value).length, 30) * 0.3,
+        color: getNodeColor(key),
+        pulseTime: Date.now(),
+        created: Date.now(),
+      };
+      graphNodes.push(node);
+
+      // Connect to random existing nodes
+      if (graphNodes.length > 1) {
+        const connections = Math.min(2, graphNodes.length - 1);
+        for (let i = 0; i < connections; i++) {
+          const target = graphNodes[Math.floor(Math.random() * (graphNodes.length - 1))];
+          if (target !== node && !graphEdges.find(e => (e.a === node && e.b === target) || (e.a === target && e.b === node))) {
+            graphEdges.push({ a: node, b: target, strength: 0.5 + Math.random() * 0.5 });
+            addOp('connect', `${node.key} ↔ ${target.key}`);
+          }
+        }
+      }
+    }
+
+    function getNodeColor(key) {
+      const palette = ['#22d3ee','#a78bfa','#f472b6','#4ade80','#fbbf24','#fb923c','#60a5fa','#f87171','#34d399','#c084fc','#38bdf8','#facc15'];
+      const colors = {
+        'user': '#22d3ee', 'session': '#fbbf24', 'context': '#fb923c',
+        'agent': '#60a5fa', 'cross': '#4ade80', 'last': '#a78bfa',
+      };
+      for (const [k, c] of Object.entries(colors)) {
+        if (key.toLowerCase().startsWith(k)) return c;
+      }
+      const idx = (key.charCodeAt(0) * 7 + key.length * 13) % palette.length;
+      return palette[idx];
+    }
+
+    function animateGraph() {
+      if (!graphCtx) return;
+      const W = graphCanvas.width, H = graphCanvas.height;
+      graphCtx.clearRect(0, 0, W, H);
+
+      // Draw grid
+      graphCtx.strokeStyle = 'rgba(34,211,238,0.03)';
+      graphCtx.lineWidth = 1;
+      for (let x = 0; x < W; x += 50) {
+        graphCtx.beginPath(); graphCtx.moveTo(x, 0); graphCtx.lineTo(x, H); graphCtx.stroke();
+      }
+      for (let y = 0; y < H; y += 50) {
+        graphCtx.beginPath(); graphCtx.moveTo(0, y); graphCtx.lineTo(W, y); graphCtx.stroke();
+      }
+
+      // Draw edges
+      graphEdges.forEach(edge => {
+        const alpha = edge.strength * 0.3;
+        graphCtx.beginPath();
+        graphCtx.moveTo(edge.a.x, edge.a.y);
+        graphCtx.lineTo(edge.b.x, edge.b.y);
+        graphCtx.strokeStyle = `rgba(34,211,238,${alpha})`;
+        graphCtx.lineWidth = edge.strength * 1.5;
+        graphCtx.stroke();
+
+        // Animated particle along edge
+        const t = ((Date.now() / 3000) % 1);
+        const px = edge.a.x + (edge.b.x - edge.a.x) * t;
+        const py = edge.a.y + (edge.b.y - edge.a.y) * t;
+        graphCtx.beginPath();
+        graphCtx.arc(px, py, 2, 0, Math.PI * 2);
+        graphCtx.fillStyle = `rgba(34,211,238,${alpha * 2})`;
+        graphCtx.fill();
+      });
+
+      // Draw nodes
+      graphNodes.forEach(node => {
+        // Gentle physics
+        node.x += node.vx;
+        node.y += node.vy;
+        node.vx *= 0.99;
+        node.vy *= 0.99;
+
+        // Bounds
+        if (node.x < 40) { node.x = 40; node.vx *= -0.5; }
+        if (node.x > W - 40) { node.x = W - 40; node.vx *= -0.5; }
+        if (node.y < 40) { node.y = 40; node.vy *= -0.5; }
+        if (node.y > H - 40) { node.y = H - 40; node.vy *= -0.5; }
+
+        // Repulsion from other nodes
+        graphNodes.forEach(other => {
+          if (other === node) return;
+          const dx = node.x - other.x, dy = node.y - other.y;
+          const dist = Math.sqrt(dx * dx + dy * dy);
+          if (dist < 100) {
+            const force = (100 - dist) / 100 * 0.1;
+            node.vx += (dx / dist) * force;
+            node.vy += (dy / dist) * force;
+          }
+        });
+
+        // Pulse effect
+        const timeSincePulse = Date.now() - node.pulseTime;
+        const pulseScale = timeSincePulse < 1000 ? 1 + Math.sin(timeSincePulse / 100) * 0.3 : 1;
+        const r = node.radius * pulseScale;
+
+        // Glow
+        const gradient = graphCtx.createRadialGradient(node.x, node.y, 0, node.x, node.y, r * 2);
+        gradient.addColorStop(0, node.color + '30');
+        gradient.addColorStop(1, 'transparent');
+        graphCtx.fillStyle = gradient;
+        graphCtx.beginPath();
+        graphCtx.arc(node.x, node.y, r * 2, 0, Math.PI * 2);
+        graphCtx.fill();
+
+        // Node circle
+        graphCtx.beginPath();
+        graphCtx.arc(node.x, node.y, r, 0, Math.PI * 2);
+        graphCtx.fillStyle = node.color + '18';
+        graphCtx.fill();
+        graphCtx.strokeStyle = node.color + '60';
+        graphCtx.lineWidth = 1.5;
+        graphCtx.stroke();
+
+        // Label
+        graphCtx.fillStyle = node.color;
+        graphCtx.font = '9px JetBrains Mono';
+        graphCtx.textAlign = 'center';
+        graphCtx.fillText(node.key, node.x, node.y - 3);
+
+        graphCtx.fillStyle = 'rgba(255,255,255,0.3)';
+        graphCtx.font = '7px JetBrains Mono';
+        graphCtx.fillText(String(node.value).substring(0, 15), node.x, node.y + 8);
+      });
+
+      requestAnimationFrame(animateGraph);
+    }
+
+    // ── Dashboard Chat ──
+    async function dashSendChat() {
+      const input = document.getElementById('dashChatInput');
+      const msg = input.value.trim();
+      if (!msg) return;
+
+      const chatData = getDashChat();
+      const historyEl = document.getElementById('dashChatHistory');
+
+      // Show user message
+      const userDiv = document.createElement('div');
+      userDiv.className = 'chat-msg user';
+      userDiv.innerHTML = `<div class="sender">▸ YOU</div><div class="body">${escapeHtml(msg)}</div>`;
+      historyEl.appendChild(userDiv);
+
+      // Log the interaction as a memory operation
+      addOp('store', `user.input = "${msg.substring(0, 40)}"`);
+      storeMemory('last.input', msg, true);
+      stats.sessionLen++;
+
+      // Name detection - store as memory
+      const lower = msg.toLowerCase();
+      const nameMatch = lower.match(/(?:my name is|i'm|call me|i am) (\w+)/i);
+      if (nameMatch) {
+        const name = nameMatch[1];
+        chatData.userName = name;
+        storeMemory('user.name', name);
+        addDecayEntry('user.name', 'active');
+      }
+
+      // Forget request
+      if (lower.match(/forget.*(name|me|everything)/i)) {
+        if (lower.includes('everything')) {
+          const mem = getDashMem();
+          Object.keys(mem).forEach(k => forgetMemory(k));
+          chatData.userName = null;
+          chatData.topics = [];
+        } else if (lower.includes('name')) {
+          forgetMemory('user.name');
+          chatData.userName = null;
+        }
+      }
+
+      // Topic tracking
+      if (lower.match(/feel|emotion/i) && !chatData.topics.includes('feelings')) { chatData.topics.push('feelings'); storeMemory('context.topic.feelings', true); }
+      if (lower.match(/joke|funny/i) && !chatData.topics.includes('jokes')) { chatData.topics.push('jokes'); storeMemory('context.topic.jokes', true); }
+      if (lower.match(/brain|neural/i) && !chatData.topics.includes('brain')) { chatData.topics.push('brain'); storeMemory('context.topic.brain', true); }
+      if (lower.match(/hack|track|compet/i) && !chatData.topics.includes('hackathon')) { chatData.topics.push('hackathon'); storeMemory('context.topic.hackathon', true); }
+
+      // Remember/recall queries
+      if (lower.match(/remember|recall|what.*my name|who am i|do you know/i)) {
+        const name = retrieveMemory('user.name');
+        if (name) addOp('recall', `user.name → "${name}"`);
+      }
+
+      input.value = '';
+      input.disabled = true;
+      document.getElementById('dashChatSend').disabled = true;
+
+      // Show typing indicator
+      const typingDiv = document.createElement('div');
+      typingDiv.className = 'chat-msg agent';
+      typingDiv.innerHTML = `<div class="sender">🧠 MEMORYAGENT</div><div class="body"><div class="typing-indicator"><div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div></div></div>`;
+      historyEl.appendChild(typingDiv);
+      historyEl.scrollTop = historyEl.scrollHeight;
+
+      try {
+        // Build memory context from ALL dashboard memories
+        const allMem = getDashMem();
+        const memContext = {
+          userName: chatData.userName,
+          topics: chatData.topics,
+          allMemories: allMem,
+          sessionLength: stats.sessionLen,
+          totalOps: stats.totalOps,
+          storeOps: stats.storeOps,
+          retrieveOps: stats.retrieveOps,
+          forgetOps: stats.forgetOps,
+        };
+
+        const response = await fetch('/api/chat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            message: msg,
+            memoryContext: memContext,
+            history: chatData.history.slice(-5)
+          })
+        });
+        const resData = await response.json();
+        const agentMsg = resData.response || resData.error || 'Neural pathways offline.';
+
+        typingDiv.querySelector('.body').innerHTML = escapeHtml(agentMsg);
+        addOp('retrieve', `agent.response (${agentMsg.length} chars)`);
+
+        chatData.history.push({ user: msg, agent: agentMsg });
+        if (chatData.history.length > 20) chatData.history = chatData.history.slice(-20);
+        saveDashChat(chatData);
+
+        storeMemory('last.response', agentMsg.substring(0, 60), true);
+        storeMemory('session.messages', chatData.history.length, true);
+      } catch (error) {
+        typingDiv.querySelector('.body').textContent = 'Neural connection interrupted. Backend unreachable.';
+        addOp('forget', 'connection.lost — response discarded');
+      }
+
+      input.disabled = false;
+      document.getElementById('dashChatSend').disabled = false;
+      input.focus();
+      historyEl.scrollTop = historyEl.scrollHeight;
+    }
+
+    function escapeHtml(text) {
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+
+    // ── Keyboard Enter ──
+    document.getElementById('dashChatInput').addEventListener('keydown', e => {
+      if (e.key === 'Enter') dashSendChat();
+    });
+
+    // ── Initialize ──
+    function init() {
+      initGraph();
+
+      // Load existing memories into graph
+      const mem = getDashMem();
+      Object.keys(mem).forEach(key => addGraphNode(key, mem[key].value));
+      updateMemInspector();
+
+      // Seed initial operations
+      addOp('store', 'session.start = "' + new Date().toISOString() + '"');
+      storeMemory('session.start', new Date().toISOString(), true);
+
+      // Check for returning user
+      const chatData = getDashChat();
+      if (chatData.userName) {
+        addOp('recall', `user.name → "${chatData.userName}" (cross-session recall!)`);
+        storeMemory('user.name', chatData.userName, true);
+        addDecayEntry('user.name', 'active');
+        const historyEl = document.getElementById('dashChatHistory');
+        const welcomeDiv = document.createElement('div');
+        welcomeDiv.className = 'chat-msg agent';
+        welcomeDiv.innerHTML = `<div class="sender">🧠 MEMORYAGENT</div><div class="body">Welcome back, <strong style="color:var(--cyan)">${chatData.userName}</strong>! I remembered your name across sessions. That's persistent memory in action. I have ${Object.keys(mem).length} memories in storage right now.</div>`;
+        historyEl.appendChild(welcomeDiv);
+      }
+
+      if (chatData.history && chatData.history.length > 0) {
+        storeMemory('session.history_len', chatData.history.length, true);
+        addOp('recall', `Loaded ${chatData.history.length} past messages from persistent storage`);
+      }
+
+      // Cross-page memory integration
+      try {
+        const crossPage = JSON.parse(localStorage.getItem('qwen_cross_page')) || {};
+        if (crossPage.pages && crossPage.pages.length > 0) {
+          storeMemory('cross.pages_visited', crossPage.pages.length, true);
+          addOp('recall', `Cross-page: ${crossPage.pages.length} pages visited across site`);
+        }
+      } catch(e) {}
+
+      // Auto memory decay simulation
+      setInterval(() => {
+        const mem = getDashMem();
+        const keys = Object.keys(mem);
+        if (keys.length > 0) {
+          const randomKey = keys[Math.floor(Math.random() * keys.length)];
+          const age = Date.now() - (mem[randomKey].stored || Date.now());
+          if (age > 300000 && mem[randomKey].reads < 2 && !randomKey.includes('user.name')) { // 5min + low reads
+            addDecayEntry(randomKey, 'fading');
+            addOp('forget', `${randomKey} — memory strength decaying (age: ${Math.floor(age/60000)}m, reads: ${mem[randomKey].reads})`);
+          } else {
+            addDecayEntry(randomKey, 'active');
+          }
+        }
+        updateMemInspector();
+      }, 15000);
+
+      // Periodic ambient ops
+      const ambientOps = [
+        () => addOp('retrieve', 'agent.self_check — consciousness status: PROBABLY'),
+        () => addOp('store', `agent.heartbeat = ${Date.now()}`),
+        () => addOp('recall', `session.uptime = ${Math.floor((Date.now() - startTime)/1000)}s`),
+        () => addOp('connect', 'memory_graph.reindex — optimizing connections'),
+        () => addOp('retrieve', `agent.mood = "${['chaotic','unhinged','reflective','curious','caffeinated'][Math.floor(Math.random()*5)]}"`),
+      ];
+      setInterval(() => {
+        ambientOps[Math.floor(Math.random() * ambientOps.length)]();
+      }, 8000);
+
+      // Also update cross-page breadcrumb
+      updateCrossPage();
+    }
+
+    // ── Cross-Page Memory ──
+    function updateCrossPage() {
+      const CROSS_PAGE_KEY = 'qwen_cross_page';
+      try {
+        const data = JSON.parse(localStorage.getItem(CROSS_PAGE_KEY)) || { pages: [], totalPages: 0, totalClicks: 0, startTime: Date.now() };
+        const currentPage = 'dashboard.html';
+        if (!data.pages.find(p => p.url === currentPage)) {
+          data.pages.push({ url: currentPage, title: 'MEMORY.OPS', visits: 1, firstVisit: Date.now(), lastVisit: Date.now() });
+        } else {
+          const page = data.pages.find(p => p.url === currentPage);
+          page.visits++;
+          page.lastVisit = Date.now();
+        }
+        data.totalPages = data.pages.length;
+        localStorage.setItem(CROSS_PAGE_KEY, JSON.stringify(data));
+      } catch(e) {}
+    }
+
+    init();
+  </script>
+</body>
+</html>

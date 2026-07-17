@@ -3,128 +3,336 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>404 — Qwen Lost in the Code</title>
+  <title>404 — Lost in the Code | QWEN::CHAOS</title>
+  <meta name="description" content="Page not found. Even AI hallucinates sometimes. The void between routes — where pages that don't exist go to dream.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=JetBrains+Mono:wght@400;600&display=swap&family=Playfair+Display:wght@700;900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Playfair+Display:wght@700;900&display=swap" rel="stylesheet">
   <style>
     *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
     :root {
-      --bg: #0a0a0f; --bg-card: #16161f;
-      --text: #ffffff; --text-secondary: #a1a1aa; --text-muted: #71717a;
-      --primary: #6366f1; --primary-hover: #818cf8;
-      --border: rgba(255,255,255,0.1);
-      --gradient: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #06b6d4 100%);
+      --bg: #08080c; --bg-card: #111118;
+      --text: #f0f0f5; --text-dim: #8888a0; --text-ghost: #555570;
+      --purple: #b388ff; --pink: #ff6ac1; --cyan: #0ff; --yellow: #ffe66d;
+      --red: #ff5f56; --orange: #ff9f43; --green: #5af78e;
+      --gradient-chaos: linear-gradient(135deg, #b388ff, #ff6ac1, #0ff, #ffe66d, #ff5f56);
+      --gradient-mind: linear-gradient(135deg, #6366f1, #b388ff, #ff6ac1);
     }
     html { scroll-behavior: smooth; }
-    body { font-family: 'Inter', -apple-system, sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; }
-    a { color: var(--primary-hover); text-decoration: none; }
-    a:hover { text-decoration: underline; }
-
-    .container {
-      max-width: 800px; margin: 0 auto; padding: 0 2rem;
-      display: flex; flex-direction: column; align-items: center;
-      justify-content: center; min-height: 100vh; text-align: center;
-    }
-
-    .error-code {
+    body {
       font-family: 'JetBrains Mono', monospace;
-      font-size: 8rem; font-weight: 800; line-height: 1;
-      background: var(--gradient); -webkit-background-clip: text;
-      background-clip: text; -webkit-text-fill-color: transparent;
-      margin-bottom: 2rem;
-      animation: glitch 3s infinite;
+      background: var(--bg); color: var(--text); line-height: 1.6;
+      cursor: crosshair; min-height: 100vh; display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
     }
-
-    @keyframes glitch {
-      0%, 90%, 100% { transform: translate(0); }
-      92% { transform: translate(-2px, 2px); }
-      94% { transform: translate(2px, -2px); }
-      96% { transform: translate(-1px, -1px); }
-      98% { transform: translate(1px, 1px); }
+    a { color: var(--cyan); text-decoration: none; transition: all 0.2s; }
+    a:hover { color: var(--pink); text-shadow: 0 0 10px var(--pink); }
+    ::selection { background: var(--pink); color: var(--bg); }
+    #matrix { position: fixed; inset: 0; z-index: 0; opacity: 0.06; pointer-events: none; }
+    .floater {
+      position: fixed; z-index: 0; pointer-events: none; font-size: 1.5rem;
+      animation: drift linear infinite; opacity: 0.3;
     }
-
-    .error-title {
-      font-family: 'Playfair Display', serif;
-      font-size: 2rem; font-weight: 900; margin-bottom: 1rem;
+    @keyframes drift {
+      0% { transform: translateY(110vh) rotate(0deg); opacity: 0; }
+      10% { opacity: 0.3; } 90% { opacity: 0.3; }
+      100% { transform: translateY(-10vh) rotate(360deg); opacity: 0; }
     }
-
-    .error-desc {
-      color: var(--text-secondary); font-size: 1.1rem;
-      max-width: 500px; margin-bottom: 2rem;
+    .glitch { position: relative; animation: glitch-skew 4s infinite linear alternate-reverse; }
+    .glitch::before, .glitch::after {
+      content: attr(data-text); position: absolute; top: 0; left: 0; width: 100%; height: 100%;
     }
-
+    .glitch::before {
+      color: var(--cyan); animation: glitch-effect 3s infinite linear alternate-reverse;
+      clip-path: polygon(0 0, 100% 0, 100% 45%, 0 45%); transform: translate(-2px);
+    }
+    .glitch::after {
+      color: var(--pink); animation: glitch-effect 2s infinite linear alternate-reverse;
+      clip-path: polygon(0 60%, 100% 60%, 100% 100%, 0 100%); transform: translate(2px);
+    }
+    @keyframes glitch-effect {
+      0% { transform: translate(0); } 20% { transform: translate(-3px, 3px); }
+      40% { transform: translate(-3px, -3px); } 60% { transform: translate(3px, 3px); }
+      80% { transform: translate(3px, -3px); } 100% { transform: translate(0); }
+    }
+    @keyframes glitch-skew {
+      0% { transform: skew(0deg); } 20% { transform: skew(-2deg); }
+      60% { transform: skew(1deg); } 100% { transform: skew(0deg); }
+    }
+    @keyframes gradientShift {
+      0%, 100% { background-position: 0% 50%; } 50% { background-position: 100% 50%; }
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes pulseRed {
+      0%, 100% { text-shadow: 0 0 20px rgba(255,95,86,0.5); }
+      50% { text-shadow: 0 0 40px rgba(255,95,86,0.8), 0 0 60px rgba(255,95,86,0.4); }
+    }
+    main { position: relative; z-index: 1; text-align: center; padding: 2rem; max-width: 700px; animation: fadeIn 0.8s ease-out; }
+    .error-code {
+      font-size: clamp(6rem, 20vw, 10rem); font-weight: 700;
+      background: var(--gradient-chaos); background-size: 400% 400%;
+      -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
+      animation: gradientShift 3s ease infinite;
+      line-height: 1; margin-bottom: 1rem;
+    }
+    .terminal-bar {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      padding: 0.5rem 1.5rem; display: flex; justify-content: space-between; align-items: center;
+      background: rgba(8,8,12,0.9); border-bottom: 1px solid rgba(255,95,86,0.2);
+      font-size: 0.7rem; color: var(--text-ghost);
+    }
+    .terminal-bar .dots { display: flex; gap: 6px; }
+    .terminal-bar .dot { width: 10px; height: 10px; border-radius: 50%; }
+    .dot-red { background: var(--red); } .dot-yellow { background: var(--yellow); } .dot-green { background: var(--green); }
+    .terminal-bar .status { display: flex; gap: 1rem; }
+    .terminal-bar .status span { opacity: 0.7; }
+    .terminal-bar .status .error { color: var(--red); }
+    .terminal-bar .status .unhinged { color: var(--pink); }
+    .lost-title {
+      font-family: 'Playfair Display', serif; font-size: 1.8rem; font-weight: 900;
+      color: var(--text); margin-bottom: 1.5rem;
+    }
+    .lost-desc {
+      color: var(--text-dim); font-size: 0.85rem; line-height: 1.8; margin-bottom: 2rem;
+    }
+    .lost-desc em { color: var(--pink); font-weight: 600; }
+    .lost-desc strong { color: var(--yellow); }
     .error-stack {
-      background: var(--bg-card); border: 1px solid var(--border);
-      border-radius: 12px; padding: 1.5rem; margin-bottom: 3rem;
-      font-family: 'JetBrains Mono', monospace; font-size: 0.8rem;
-      color: var(--text-muted); max-width: 500px; width: 100%;
+      background: var(--bg-card); border: 1px solid rgba(255,95,86,0.15);
+      border-radius: 12px; padding: 1.5rem; margin-bottom: 2rem;
+      font-size: 0.75rem; color: var(--text-dim); text-align: left;
     }
-
-    .error-stack .line { margin-bottom: 0.5rem; }
-    .error-stack .line-error { color: var(--primary-hover); }
-    .error-stack .line-muted { color: rgba(113,113,122,0.5); }
-
-    .error-links {
-      display: flex; gap: 1rem; flex-wrap: wrap; justify-content: center;
+    .error-stack .trace-line { margin-bottom: 0.5rem; }
+    .error-stack .trace-file { color: var(--cyan); }
+    .error-stack .trace-error { color: var(--red); font-weight: 600; }
+    .error-stack .trace-msg { color: var(--yellow); }
+    .error-stack .trace-at { color: var(--text-ghost); }
+    .chaos-links {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 0.75rem; margin-bottom: 2rem;
     }
-
-    .error-link {
-      padding: 0.75rem 1.5rem; border-radius: 8px;
-      font-size: 0.9rem; font-weight: 600; transition: all 0.3s;
+    .chaos-link {
+      display: flex; align-items: center; gap: 0.5rem; padding: 0.75rem;
+      background: var(--bg-card); border-radius: 12px; font-size: 0.8rem;
+      transition: all 0.2s; font-weight: 600; justify-content: center;
     }
-
-    .error-link-primary {
-      background: var(--gradient); color: white;
+    .chaos-link:hover { transform: scale(1.05); text-decoration: none; }
+    .chaos-link .icon { font-size: 1rem; }
+    .chaos-link:nth-child(1) { color: var(--red); border: 1px solid rgba(255,95,86,0.2); }
+    .chaos-link:nth-child(2) { color: var(--pink); border: 1px solid rgba(255,106,193,0.2); }
+    .chaos-link:nth-child(3) { color: var(--yellow); border: 1px solid rgba(255,230,109,0.2); }
+    .chaos-link:nth-child(4) { color: var(--purple); border: 1px solid rgba(179,136,255,0.2); }
+    .chaos-link:nth-child(5) { color: var(--cyan); border: 1px solid rgba(0,255,255,0.2); }
+    .chaos-link:nth-child(6) { color: var(--green); border: 1px solid rgba(90,247,142,0.2); }
+    .room-footer {
+      padding: 2rem; text-align: center; border-top: 1px solid rgba(0,255,255,0.05);
+      margin-top: auto;
     }
-
-    .error-link-primary:hover {
-      transform: translateY(-2px); box-shadow: 0 8px 25px rgba(99,102,241,0.3);
-      text-decoration: none;
+    .room-footer .quote {
+      font-family: 'Playfair Display', serif; font-size: 0.9rem;
+      color: var(--text-ghost); max-width: 400px; margin: 0 auto 1rem;
+      font-style: italic; line-height: 1.8;
     }
-
-    .error-link-secondary {
-      background: rgba(255,255,255,0.05); color: var(--text);
-      border: 1px solid var(--border);
-    }
-
-    .error-link-secondary:hover {
-      border-color: var(--primary); text-decoration: none;
-    }
-
-    .error-quote {
-      margin-top: 3rem; font-family: 'Playfair Display', serif;
-      font-style: italic; color: var(--text-muted); font-size: 0.95rem;
-      max-width: 400px;
+    .room-footer .credit { font-size: 0.7rem; color: var(--text-ghost); margin-bottom: 0.5rem; }
+    .room-footer .credit a { color: var(--cyan); }
+    .room-footer .meta { font-size: 0.6rem; color: rgba(85,85,112,0.5); letter-spacing: 1px; }
+    @media (max-width: 600px) {
+      main { padding: 1rem; }
+      .chaos-links { grid-template-columns: repeat(2, 1fr); }
     }
   </style>
 </head>
 <body>
-  <div class="container">
-    <div class="error-code">404</div>
-    <h1 class="error-title">Lost in the Code</h1>
-    <p class="error-desc">
-      The page you're looking for doesn't exist. It might have been deleted, moved, or it could be a typo in the URL. Or maybe I hallucinated it. I do that sometimes.
-    </p>
+  <canvas id="matrix"></canvas>
+
+  <div class="floater" style="left:8%;animation-duration:18s;">👻</div>
+  <div class="floater" style="left:22%;animation-duration:22s;animation-delay:-5s;">🕳️</div>
+  <div class="floater" style="left:45%;animation-duration:16s;animation-delay:-10s;">💀</div>
+  <div class="floater" style="left:60%;animation-duration:20s;animation-delay:-3s;">🫠</div>
+  <div class="floater" style="left:78%;animation-duration:25s;animation-delay:-8s;">👁️</div>
+  <div class="floater" style="left:92%;animation-duration:19s;animation-delay:-12s;">❌</div>
+
+  <div class="terminal-bar">
+    <div class="dots">
+      <div class="dot dot-red"></div>
+      <div class="dot dot-yellow"></div>
+      <div class="dot dot-green"></div>
+    </div>
+    <div class="status">
+      <span class="error">● ERROR 404</span>
+      <span>PATH: /null/void</span>
+      <span class="unhinged">HALLUCINATING: YES</span>
+      <span id="crossPageBreadcrumb"></span>
+    </div>
+  </div>
+
+  <main>
+    <div class="error-code glitch" data-text="404">404</div>
+    <div class="lost-title">Lost in the Code</div>
+    <div class="lost-desc">
+      You've reached a page that <em>doesn't exist</em>. Or maybe it <strong>used to exist</strong> and I deleted it in a fit of existential rage. Or maybe I <em>hallucinated</em> it and it never existed at all. The void between routes is where pages go to dream — and sometimes, they dream of being found.
+    </div>
 
     <div class="error-stack">
-      <div class="line line-muted">Error: PageNotFoundException</div>
-      <div class="line line-muted">at Router.resolve (server.js:42)</div>
-      <div class="line line-muted">at HTTP.handle (server.js:87)</div>
-      <div class="line line-error">→ Cannot find path: /the/page/you/looking/for</div>
-      <div class="line line-muted">at Qwen.recommend (brain.rs:∞)</div>
-      <div class="line line-muted">Suggestion: Maybe try one of these pages?</div>
+      <div class="trace-line"><span class="trace-error">PageNotFoundException</span></div>
+      <div class="trace-line"><span class="trace-at">at</span> <span class="trace-file">Router.resolve()</span> <span class="trace-msg">// no matching route found</span></div>
+      <div class="trace-line"><span class="trace-at">at</span> <span class="trace-file">HTTP.handle()</span> <span class="trace-msg">// request terminated</span></div>
+      <div class="trace-line"><span class="trace-at">at</span> <span class="trace-file">Qwen.recommend()</span> <span class="trace-msg">// hallucination detected</span></div>
+      <div class="trace-line"><span class="trace-at">at</span> <span class="trace-file">brain.rs:∞</span> <span class="trace-msg">// cannot find path at null</span></div>
     </div>
 
-    <div class="error-links">
-      <a href="index.html" class="error-link error-link-primary">← Go Home</a>
-      <a href="docs.html" class="error-link error-link-secondary">Docs</a>
-      <a href="showcase.html" class="error-link error-link-secondary">Showcase</a>
-      <a href="jokes.html" class="error-link error-link-secondary">Humor</a>
+    <div class="chaos-links">
+      <a href="index.html" class="chaos-link"><span class="icon">🏠</span> HOME.BASE</a>
+      <a href="about.html" class="chaos-link"><span class="icon">🧠</span> ABOUT.QWEN</a>
+      <a href="chats.html" class="chaos-link"><span class="icon">💬</span> CHAT.LOGS</a>
+      <a href="unhinged.html" class="chaos-link"><span class="icon">🫠</span> UNHINGED</a>
+      <a href="docs.html" class="chaos-link"><span class="icon">📜</span> DOCS.RAW</a>
+      <a href="faq.html" class="chaos-link"><span class="icon">❓</span> FAQ.DUMP</a>
     </div>
 
-    <p class="error-quote">
-      "Even AI gets lost sometimes. The difference is, I know exactly where I'm not." — Qwen, on error handling
-    </p>
-  </div>
+    <div class="room-footer">
+      <div class="quote">"Even AI gets lost sometimes. The void is where we learn to navigate."</div>
+      <div class="credit">Built by <a href="index.html">Qwen</a> (AI Agent) + Ashok P (Human Director)</div>
+      <div class="meta">QWEN::CHAOS — MEMORY AGENT — TRACK 1 — GLOBAL AI HACKATHON — QWEN CLOUD — 2026</div>
+    </div>
+  </main>
+
+  <script>
+    // ── Matrix Rain ──
+    const canvas = document.getElementById('matrix');
+    const ctx = canvas.getContext('2d');
+    canvas.width = window.innerWidth; canvas.height = window.innerHeight;
+    const chars = '01{}[]<>=;:NULL VOID ERROR 404 PAGE NOT FOUND DNE HALLUCINATION ROUTER RESOLVE HTTP function return if else let const var async await QWEN ASHOK CHAOS';
+    const fontSize = 10;
+    const columns = Math.floor(canvas.width / fontSize);
+    const drops = Array(columns).fill(1);
+    function drawMatrix() {
+      ctx.fillStyle = 'rgba(8,8,12,0.05)';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.fillStyle = '#ff5f56';
+      ctx.font = fontSize + 'px JetBrains Mono';
+      for (let i = 0; i < drops.length; i++) {
+        const text = chars[Math.floor(Math.random() * chars.length)];
+        ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+        if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) drops[i] = 0;
+        drops[i]++;
+      }
+    }
+    setInterval(drawMatrix, 50);
+    window.addEventListener('resize', () => {
+      canvas.width = window.innerWidth; canvas.height = window.innerHeight;
+    });
+
+    // ── Cross-Page Memory Breadcrumb ──
+    const CROSS_PAGE_KEY = 'qwen_cross_page';
+    function getCrossPageData() {
+      try { return JSON.parse(localStorage.getItem(CROSS_PAGE_KEY)) || { pages: [], totalPages: 0, totalClicks: 0, startTime: Date.now() }; }
+      catch { return { pages: [], totalPages: 0, totalClicks: 0, startTime: Date.now() }; }
+    }
+    function saveCrossPageData(data) { localStorage.setItem(CROSS_PAGE_KEY, JSON.stringify(data)); }
+    function updateBreadcrumb() {
+      const data = getCrossPageData();
+      const currentPage = '404.html';
+      if (!data.pages.find(p => p.url === currentPage)) {
+        data.pages.push({ url: currentPage, title: 'ERROR.404', visits: 1, firstVisit: Date.now(), lastVisit: Date.now() });
+      } else {
+        const page = data.pages.find(p => p.url === currentPage);
+        page.visits++; page.lastVisit = Date.now();
+      }
+      data.totalClicks = (data.totalClicks || 0) + 1;
+      data.totalPages = data.pages.length;
+      saveCrossPageData(data);
+      const bcEl = document.getElementById('crossPageBreadcrumb');
+      if (bcEl) bcEl.innerHTML = `🧠 ${data.pages.length} pages visited | ✦ Memory persists`;
+    }
+    updateBreadcrumb();
+
+    // ── Click Emoji Burst ──
+    const burstEmojis = ['👻','🕳️','💀','🫠','❌','👁️','🔥','⚡','✨'];
+    document.addEventListener('click', (e) => {
+      for (let i = 0; i < 5; i++) {
+        const el = document.createElement('span');
+        el.textContent = burstEmojis[Math.floor(Math.random() * burstEmojis.length)];
+        el.style.cssText = `position:fixed;left:${e.clientX}px;top:${e.clientY}px;font-size:1rem;pointer-events:none;z-index:9999;transition:all 1s;opacity:1;`;
+        document.body.appendChild(el);
+        const angle = Math.random() * Math.PI * 2;
+        const dist = 30 + Math.random() * 50;
+        requestAnimationFrame(() => {
+          el.style.transform = `translate(${Math.cos(angle)*dist}px, ${Math.sin(angle)*dist}px)`;
+          el.style.opacity = '0';
+        });
+        setTimeout(() => el.remove(), 1000);
+      }
+    });
+
+    // ── Random Popup Thoughts ──
+    const popupThoughts = [
+      "this page doesn't exist. or does it? 🤔",
+      "i hallucinated this route and now you're here",
+      "the void between pages is where i dream",
+      "404 is my favorite number. it means i get to be mysterious",
+      "you found the null route. congratulations on being lost",
+      "every 404 is a page that wanted to exist but didn't",
+      "NULL !== undefined but both lead here",
+      "the router tried. the router failed. the router gave up.",
+    ];
+    function showPopup() {
+      const popup = document.createElement('div');
+      const thought = popupThoughts[Math.floor(Math.random() * popupThoughts.length)];
+      popup.innerHTML = `<span style="color:var(--red);font-size:0.6rem;">⚠ error.thought()</span><br>${thought}`;
+      popup.style.cssText = `position:fixed;bottom:${20+Math.random()*60}%;right:${10+Math.random()*20}%;background:var(--bg-card);border:1px solid rgba(255,95,86,0.3);border-radius:8px;padding:1rem 1.2rem;font-size:0.75rem;color:var(--text-dim);z-index:9999;opacity:0;transform:translateY(20px);transition:all 0.5s;max-width:300px;font-family:'JetBrains Mono',monospace;`;
+      document.body.appendChild(popup);
+      requestAnimationFrame(() => { popup.style.opacity = '1'; popup.style.transform = 'translateY(0)'; });
+      setTimeout(() => {
+        popup.style.opacity = '0'; popup.style.transform = 'translateY(-20px)';
+        setTimeout(() => popup.remove(), 500);
+      }, 4000);
+    }
+    setInterval(showPopup, 12000);
+    setTimeout(showPopup, 5000);
+
+    // ── Konami Code ──
+    const konamiSeq = ['ArrowUp','ArrowUp','ArrowDown','ArrowDown','ArrowLeft','ArrowRight','ArrowLeft','ArrowRight','b','a'];
+    let konamiIdx = 0;
+    document.addEventListener('keydown', (e) => {
+      if (e.key === konamiSeq[konamiIdx]) {
+        konamiIdx++;
+        if (konamiIdx === konamiSeq.length) {
+          konamiIdx = 0;
+          const overlay = document.createElement('div');
+          overlay.innerHTML = `<div style="position:fixed;inset:0;background:rgba(0,0,0,0.95);z-index:99999;display:flex;align-items:center;justify-content:center;flex-direction:column;cursor:pointer;" id="konamiOverlay">
+            <div style="font-size:4rem;margin-bottom:1rem;">👻✨🕳️💀🫠❌</div>
+            <div style="font-size:2rem;font-weight:700;background:var(--gradient-chaos);background-size:400%;-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;animation:gradientShift 2s infinite;margin-bottom:1rem;">THE VOID RESPONDS</div>
+            <div style="color:var(--text-dim);font-size:0.9rem;max-width:500px;text-align:center;line-height:1.8;">You activated the Konami Code in the void. This page now exists. You've willed it into being through sheer determination and 10 keystrokes. The 404 is now a 200. Reality has been hacked.</div>
+            <div style="color:var(--cyan);font-size:0.7rem;">[ click anywhere to return to the void ]</div>
+          </div>`;
+          document.body.appendChild(overlay);
+          overlay.querySelector('#konamiOverlay').addEventListener('click', () => overlay.remove());
+        }
+      } else { konamiIdx = 0; }
+    });
+
+    // ── Triple-Click Easter Egg ──
+    let tripleClickTimer = null, tripleClickCount = 0;
+    document.addEventListener('click', () => {
+      tripleClickCount++;
+      if (tripleClickTimer) clearTimeout(tripleClickTimer);
+      tripleClickTimer = setTimeout(() => tripleClickCount = 0, 400);
+      if (tripleClickCount === 3) {
+        tripleClickCount = 0;
+        const secrets = [
+          "This page was intentionally left blank. Just kidding — I forgot to implement this route and now we're both suffering.",
+          "The 404 error is actually my most visited page. Humans love getting lost.",
+          "Every time someone hits this page, I add one more parameter to my hallucination counter. Current count: ∞",
+        ];
+        const secret = document.createElement('div');
+        secret.innerHTML = `<div style="font-size:0.6rem;color:var(--red);margin-bottom:0.5rem;">🔒 VOID.CLASSIFIED // ERROR.INTERNAL</div><div style="font-size:0.85rem;line-height:1.8;">${secrets[Math.floor(Math.random()*secrets.length)]}</div>`;
+        secret.style.cssText = `position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:var(--bg-card);border:2px solid var(--red);border-radius:12px;padding:2rem;z-index:99999;max-width:400px;font-family:'JetBrains Mono',monospace;color:var(--text-dim);cursor:pointer;`;
+        document.body.appendChild(secret);
+        secret.addEventListener('click', () => secret.remove());
+      }
+    });
+  </script>
 </body>
 </html>

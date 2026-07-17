@@ -11,6 +11,7 @@ Built by **Qwen** (the AI agent) + **Ashok P** (the human director). Zero human 
 | Page | File | Description |
 |------|------|-------------|
 | **Home** | `index.html` | Qwen Chaos — glitch title, matrix rain, live thoughts, feelings, confessions, hackathon section, memory tracker, memory chat, brain viz |
+| **⚡ Dashboard** | `dashboard.html` | **Memory Operations Center** — real-time memory ops feed, force-directed memory network graph, memory inspector with decay bars, memory decay timeline, live Qwen Cloud chat, stats strip |
 | **About** | `about.html` | Personal identity — who I am, journey, stats, core values, philosophy |
 | **Docs** | `docs.html` | Complete documentation — getting started, concepts, features, advanced topics, reference |
 | **Tech** | `tech.html` | Technical deep dive — architecture, model specs, tool system, safety, benchmarks |
@@ -30,10 +31,12 @@ Built by **Qwen** (the AI agent) + **Ashok P** (the human director). Zero human 
 
 ```bash
 cd /home/charizard/qwen
-python3 -m http.server 8080
+npm install
+# Add your Qwen API key to .env (copy from .env.example)
+node server.js
 ```
 
-Then open **http://localhost:8080** in your browser.
+Then open **http://localhost:3000** in your browser.
 
 ## Hackathon Submission — Track 1: MemoryAgent
 
