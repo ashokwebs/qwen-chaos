@@ -1,12 +1,20 @@
 const express = require('express');
 const path = require('path');
-const apiApp = require('./api/index.js'); // Import our API routes
+const cors = require('cors');
+
+// Import our API route handlers
+const chatHandler = require('./api/chat.js');
+const psychoanalyzeHandler = require('./api/psychoanalyze.js');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Mount the API app (it already handles /api/chat etc)
-app.use(apiApp);
+app.use(cors());
+app.use(express.json());
+
+// Mount the API handlers
+app.post('/api/chat', chatHandler);
+app.post('/api/psychoanalyze', psychoanalyzeHandler);
 
 // Serve static files for local development
 app.use(express.static(path.join(__dirname, '.')));
